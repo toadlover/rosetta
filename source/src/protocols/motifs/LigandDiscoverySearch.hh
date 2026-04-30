@@ -139,8 +139,23 @@ public:
 	// @brief function to append an additional single working position index to the existing working_positions_ vector
 	void add_working_positions(core::Size working_positions);
 
-	// @brief return contents of working_positions_
+	// @brief return contents of working_positions_ vector
 	utility::vector1<core::Size>  get_working_positions();
+
+	// @brief function to define the vector of OPTIONAL secondary residue indices that we will use for applying motifs for ligand placements
+	void set_secondary_working_positions(utility::vector1<core::Size> working_position);
+
+	// @brief overload function to define the vector of secondary residue indices that we will use for applying motifs for ligand placements; takes single core::Size
+	void set_secondary_working_positions(core::Size working_position);
+
+	// @brief function to append an additional vector of secondary position indices to the existing secondary_working_positions_ vector
+	void add_secondary_working_positions(utility::vector1<core::Size> working_positions);
+
+	// @brief function to append an additional single working position index to the existing secondary_working_positions_ vector
+	void add_secondary_working_positions(core::Size working_positions);
+
+	// @brief return contents of secondary_working_positions_ vector
+	utility::vector1<core::Size>  get_secondary_working_positions();
 
 	// @brief function to load in a pose for the receptor
 	void set_working_pose(core::pose::PoseOP pose_from_PDB);
@@ -229,8 +244,10 @@ private:
 	protocols::motifs::MotifCOPs motif_library_for_select_residue_;
 	// @brief ligand library
 	utility::vector1<core::conformation::ResidueOP> all_residues_;
-	// @brief vector to hold list of all indices to investigate/use as anchor residues, used to set value of working_position_
+	// @brief vector to hold list of all indices to investigate/use as anchor residues, used to set value of working_position
 	utility::vector1<core::Size> working_positions_;
+	// @brief vector to hold a secondary list of all indices to investigate/use as a secondary anchor residue, used to set value of secondary_working_position
+	utility::vector1<core::Size> secondary_working_positions_;
 
 	// @brief variable to be used as a cutoff to define the maximum allowed fa_rep score for a placement to be considered
 	core::Real fa_rep_cutoff_;

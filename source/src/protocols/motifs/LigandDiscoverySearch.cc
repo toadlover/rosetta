@@ -293,7 +293,7 @@ void LigandDiscoverySearch::set_working_positions(utility::vector1<core::Size> w
 	working_positions_ = working_position;
 }
 
-//overload of set_working_position to take in a single core::Size that is not in a vector, in case the user is only interesting in one position
+//overload of set_working_position to take in a single core::Size that is not in a vector, in case the user is only interested in one position
 //This seems like a handy way to be more flexible and allow working on a single position that doesn't have to be put in a vector first
 void LigandDiscoverySearch::set_working_positions(core::Size working_position)
 {
@@ -328,6 +328,49 @@ void LigandDiscoverySearch::add_working_positions(core::Size working_position)
 utility::vector1<core::Size> LigandDiscoverySearch::get_working_positions()
 {
 	return working_positions_;
+}
+
+//function to define the vector of residue indices that we will use for docking with a second motif. If the vector has contents, we will use it.
+void LigandDiscoverySearch::set_secondary_working_positions(utility::vector1<core::Size> secondary_working_position)
+{
+	secondary_working_positions_ = secondary_working_position;
+}
+
+//overload of set_secondary_working_position to take in a single core::Size that is not in a vector, in case the user is only interested in one position
+//This seems like a handy way to be more flexible and allow working on a single position that doesn't have to be put in a vector first
+void LigandDiscoverySearch::set_secondary_working_positions(core::Size secondary_working_position)
+{
+	//wipe previous contents of working_positions_
+	secondary_working_positions_.clear();
+
+	//push back the passed working_position
+	secondary_working_positions_.push_back(secondary_working_position);
+}
+
+//append vector of additional position(s) to secondary_working_positions_ to the end of the vector
+void LigandDiscoverySearch::add_secondary_working_positions(utility::vector1<core::Size> secondary_working_positions)
+{
+
+	for ( const auto & secondary_working_position : secondary_working_positions ) {
+		//push back the passed working_position
+		secondary_working_positions_.push_back(secondary_working_position);
+	}
+}
+
+//append single additional position to secondary_working_positions_ to the end of the vector
+void LigandDiscoverySearch::add_secondary_working_positions(core::Size secondary_working_position)
+{
+
+	//push back the passed working_position
+	secondary_working_positions_.push_back(secondary_working_position);
+
+}
+
+//return contents of secondary_working_positions_
+//probably always safest to return as a vector, even if there could only be one entry
+utility::vector1<core::Size> LigandDiscoverySearch::get_secondary_working_positions()
+{
+	return secondary_working_positions_;
 }
 
 //return contents of motif_library_
@@ -1039,6 +1082,36 @@ core::Size LigandDiscoverySearch::discover(std::string output_prefix)
 							continue;
 						}
 					}
+
+					//optional (and eventually recommended) investigation whether this placement effectively forms another motif with a second residue of interest
+					//take the placed ligand, and attempt to collect a motif between the ligresOP and the second residue
+					//iterate against all motifs for the second residue and see if there is a motif from the provided library that matches the placement
+
+					//only investigate if secondary_working_positions_ is not empty (size > 0)
+					if ( secondary_working_positions_.size() > 0 ) {
+						ms_tr.Debug << "Secondary residue motif dock." << std::endl;
+
+						//boolean to determine if we make a motif with any of the other secondary working positions
+						bool makes_secondary_motif = false;
+
+						//iterate over each residue index in the secondary_working_positions_
+						for ( const auto & secondary_working_position : secondary_working_positions_ ) {
+							//make sure that the iterated secondary position is not the same as the workign anchor
+							if ( secondary_working_position == working_position ) {
+								continue;
+							}
+
+							//otherwise, actually try to pull a motif from the ligand against this second residue and see if we do
+							//implement this!!!!!
+						}
+
+						//continue to next placement because we fail to make a second motif
+						if ( makes_secondary_motif == false ) {
+							continue;
+						}
+
+					}
+					
 
 					//create the minipose to use for early scoring (atr, rep, atrrep) if it does not exist already
 					if ( minipose->size() == 0 ) {

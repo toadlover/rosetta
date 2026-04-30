@@ -246,6 +246,15 @@ main( int argc, char * argv [] )
 			ms_tr << "Making LigandDiscoverySearch object" << std::endl;
 			//protocols::motifs::LigandDiscoverySearch lds(pose, motifcops, all_residues, discovery_position);
 			LigandDiscoverySearch lds(pose, motifcops, all_residues, discovery_position);
+
+			//optionally seed the lds with secondary residue values if the motifs::secondary_protein_discovery_locus flag was used
+			if ( option[ OptionKeys::motifs::secondary_protein_discovery_locus ].user() ) {
+				//set inputs as Size
+				utility::vector1<core::Size> secondary_discovery_position = option[ OptionKeys::motifs::secondary_protein_discovery_locus ];
+				//use vector overload of setter
+				lds.set_secondary_working_positions(secondary_discovery_position);
+			}			
+
 			//run discovery
 			ms_tr << "Running discovery for " << pdbprefix << std::endl;
 			lds.discover(pdbprefix);
