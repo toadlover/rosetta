@@ -250,7 +250,7 @@ main( int argc, char * argv [] )
 			//optionally seed the lds with secondary residue values if the motifs::secondary_protein_discovery_locus flag was used
 			if ( option[ OptionKeys::motifs::secondary_protein_discovery_locus ].user() ) {
 				//set inputs as Size
-				utility::vector1<core::Size> secondary_discovery_position = option[ OptionKeys::motifs::secondary_protein_discovery_locus ];
+				utility::vector1<core::Size> secondary_discovery_position = option[ OptionKeys::motifs::secondary_protein_discovery_locus ]();
 				//use vector overload of setter
 				lds.set_secondary_working_positions(secondary_discovery_position);
 			}			
