@@ -765,10 +765,10 @@ core::Size LigandDiscoverySearch::discover(std::string output_prefix)
 		//hash the motif library into a map of smaller motif lists based on the residue involved and 6 atom names/types
 		//define new map
 		std::map<protocols::motifs::motif_atoms,protocols::motifs::MotifCOPs> mymap;
-		//only hash if we use the flag check_if_ligand_motifs_match_real, since this is currently the only thing we use it for
-		if ( option[ OptionKeys::motifs::check_if_ligand_motifs_match_real] ) {
-			protocols::motifs::hash_motif_library_into_map(motif_library_,mymap);
-		}
+
+		// hash the map
+		protocols::motifs::hash_motif_library_into_map(motif_library_,mymap);
+
 
 		//declare the clash pose grid
 
@@ -1103,6 +1103,9 @@ core::Size LigandDiscoverySearch::discover(std::string output_prefix)
 
 							//otherwise, actually try to pull a motif from the ligand against this second residue and see if it matches a real motif
 							//implement this!!!!!
+
+							//make a temporary pose that has the residue and the ligand
+							//a pose is required (instead of just residue objects) for ligand-residue energy calculations in motif identification (the core code needs a pose to work with score functions)
 						}
 
 						//continue to next placement because we fail to make a second motif

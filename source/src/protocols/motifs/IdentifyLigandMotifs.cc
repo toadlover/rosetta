@@ -955,9 +955,18 @@ std::tuple<bool, std::string, std::string> single_motif_exists_in_library(protoc
 				return std::tuple(true, comment_header, real_motif_match_info);
 			}
 		}
-
 	}
-
 	//return if match not found in any case
 	return std::tuple(false, comment_header, fail_output);
+}
+
+// Function to take a pose and only see if motifs are made and if they exist in a provided library map
+// Effectively a simplified and streamlined version of evaluate_motifs_of_pose
+// Must provide a pose, because a pose is needed for residue-ligand packing/hbond energy calculations
+// only pulls motifs using ligand_to_residue_analysis() (main function called within process_for_motifs) to collect motifs from a single residue against a ligand
+// will then use single_motif_exists_in_library() to see if the motif exists in a larger motif library
+// returns a bool indicating whether any motifs were found for the residue-ligand pair in the library
+bool residue_forms_library_motif()
+{
+	
 }
