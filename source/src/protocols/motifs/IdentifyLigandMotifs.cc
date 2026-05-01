@@ -845,92 +845,19 @@ utility::vector1< core::Real > IdentifyLigandMotifs::evaluate_motifs_of_pose(cor
 
 		//iterate over the library of motifs created by the ligand placement
 		for ( auto ligmotifcop : placement_libraryCOPs ) {
-			//derive tuple key
-			protocols::motifs::motif_atoms curkey_tuple(ligmotifcop->restype_name1(),ligmotifcop->res1_atom1_name(),ligmotifcop->res1_atom2_name(),ligmotifcop->res1_atom3_name(),ligmotifcop->res2_atom1_name(),ligmotifcop->res2_atom2_name(),ligmotifcop->res2_atom3_name());
 
-			ms_tr.Debug << "lgnd start: " << ligmotifcop->restype_name1() << "," << ligmotifcop->res1_atom1_name() << "," << ligmotifcop->res1_atom2_name() << "," << ligmotifcop->res1_atom3_name() << "," << ligmotifcop->res2_atom1_name() << "," << ligmotifcop->res2_atom2_name() << "," << ligmotifcop->res2_atom3_name() << std::endl;
+			//call 
+			std::tuple<bool, std::string, std::string> results = single_motif_exists_in_library(ligmotifcop, mymap);
 
-			//count the number of motifs in the real library that have the same residue and all 6 atom types
-			core::Size real_library_section_has_motifs = mymap.count(curkey_tuple);
-
-			//pull out the motif library that matches the current motif that we are on by atom names (if there is one)
-			//use map count function to determine if the key exists
-			if ( real_library_section_has_motifs > 0 ) {
-
-				//key exists
-				//pull out motif library at key address and then compare all motifs in the list against ligmotifcop to see if it resembles a real motif
-				protocols::motifs::MotifCOPs real_motifs = mymap[curkey_tuple];
-
-				ms_tr.Debug << "For motif " << ligmotifcop->remark() << " there are " << real_motifs.size() << " motifs in the real library to match against" << std::endl;
-
-				//create a bool that determines if we found a real match for the motif or not
-				bool real_match_found = false;
-
-				//iterate over the library and compare
-				for ( auto realmotifcop : real_motifs ) {
-
-					ms_tr.Debug << "lgnd: " << ligmotifcop->restype_name1() << "," << ligmotifcop->res1_atom1_name() << "," << ligmotifcop->res1_atom2_name() << "," << ligmotifcop->res1_atom3_name() << "," << ligmotifcop->res2_atom1_name() << "," << ligmotifcop->res2_atom2_name() << "," << ligmotifcop->res2_atom3_name() << std::endl;
-					ms_tr.Debug << "real: " << realmotifcop->restype_name1() << "," << realmotifcop->res1_atom1_name() << "," << realmotifcop->res1_atom2_name() << "," << realmotifcop->res1_atom3_name() << "," << realmotifcop->res2_atom1_name() << "," << realmotifcop->res2_atom2_name() << "," << realmotifcop->res2_atom3_name() << std::endl;
-
-
-					//compare code based on remove_duplicate_motifs
-					//difference is that we are not deleting any motifs, instead if we get a match hit, we will call out ligand-derived motif real
-					//secondary confirm that the motifs match (there is no good reason why we should hit a continue off of this if the map is formed right)
-					//no need to check if restype_name2 is equal, since it is expected that those names should be different (from completely different molecules)
-					if ( ligmotifcop->motif_atom_match_lax(*realmotifcop) == false ) continue;
-
-					core::Real motif_distance = 0;
-					core::Real motif_theta = 0;
-
-					jump_distance(ligmotifcop->forward_jump(), realmotifcop->forward_jump(), motif_distance, motif_theta);
-
-					ms_tr.Debug << "Comparing to motif " << realmotifcop->remark() << std::endl;
-					ms_tr.Debug << "Distance: " << motif_distance << std::endl;
-					ms_tr.Debug << "Theta: " << motif_theta << std::endl;
-
-
-					if ( motif_distance <= option[ basic::options::OptionKeys::motifs::duplicate_dist_cutoff ] && motif_theta <= option[ basic::options::OptionKeys::motifs::duplicate_angle_cutoff ] ) {
-						//note that the motif matches a real one
-
-						ms_tr.Debug << "Current motif matches real motif with distance: " << motif_distance << "  and angle difference: "  << motif_theta << std::endl;
-						if ( ligmotifcop->has_remark() ) {
-							ms_tr.Debug << "Ligand remark is: " << ligmotifcop->remark() << std::endl;
-						}
-						if ( realmotifcop->has_remark() ) {
-							ms_tr.Debug << "Real motif remark is: " << realmotifcop->remark() << std::endl;
-						}
-
-
-						//increment real counter
-						++placement_motifs_data[4];
-
-						std::string real_motif_match_info = "remark: " + realmotifcop->remark() + ", distance: " + std::to_string(motif_distance) + ", angle: " + std::to_string(motif_theta);
-
-						//add comment about real motif match for placement motif
-						core::pose::add_comment(*working_pose, "Placement motifs: Real motif check - " + ligmotifcop->remark(), real_motif_match_info);
-
-						real_match_found = true;
-
-						//greedy algorithm, stop for current ligmotifcop when we hit the first match since we got what we wanted
-						break;
-					}
-
-				}
-
-				//if no real match was found, note comment
-				if ( real_match_found == false ) {
-					ms_tr.Debug << "No real motif matches identified for motif: " << *ligmotifcop << std::endl;
-
-					core::pose::add_comment(*working_pose, "Placement motifs: Real motif check - " + ligmotifcop->remark(), "No real match, library had no motifs that were close enough");
-				}
-			} else {
-				//key (and real motif in our library) does not exist
-				//declare that this motif is not considered real
-
-				ms_tr.Debug << "No real motifs identified for motif: " << *ligmotifcop << std::endl;
-
-				core::pose::add_comment(*working_pose, "Placement motifs: Real motif check - " + ligmotifcop->remark(), "No real match, library had no motifs with matching atoms");
+			//increment real motif counter if true
+			if ( std::get<0>(results) )
+			{
+				//increment real counter
+				++placement_motifs_data[4];				
 			}
+
+			//add comment to the working pose
+			core::pose::add_comment(*working_pose, std::get<1>(results), std::get<2>(results));
 		}
 
 		//determine the ratio of ligand motifs that match real ones
@@ -944,4 +871,93 @@ utility::vector1< core::Real > IdentifyLigandMotifs::evaluate_motifs_of_pose(cor
 
 	//return placement motifs data at the end
 	return placement_motifs_data;
+}
+
+//this function serves to see if a motif exists in a motif library map
+//returns a tuple as a bool for if a motif match was found and corresponding strings that detail the hit result (intended use is to add to pose comments, but you can do whatever you want with strings)
+std::tuple<bool, std::string, std::string> single_motif_exists_in_library(protocols::motifs::MotifCOP ligmotifcop, std::map<protocols::motifs::motif_atoms,protocols::motifs::MotifCOPs> mymap)
+{
+	//derive tuple key
+	protocols::motifs::motif_atoms curkey_tuple(ligmotifcop->restype_name1(),ligmotifcop->res1_atom1_name(),ligmotifcop->res1_atom2_name(),ligmotifcop->res1_atom3_name(),ligmotifcop->res2_atom1_name(),ligmotifcop->res2_atom2_name(),ligmotifcop->res2_atom3_name());
+
+	ms_tr.Debug << "lgnd start: " << ligmotifcop->restype_name1() << "," << ligmotifcop->res1_atom1_name() << "," << ligmotifcop->res1_atom2_name() << "," << ligmotifcop->res1_atom3_name() << "," << ligmotifcop->res2_atom1_name() << "," << ligmotifcop->res2_atom2_name() << "," << ligmotifcop->res2_atom3_name() << std::endl;
+
+	//count the number of motifs in the real library that have the same residue and all 6 atom types
+	core::Size real_library_section_has_motifs = mymap.count(curkey_tuple);
+
+	//output header of motif
+	std::string comment_header = "Placement motifs: Real motif check - " + ligmotifcop->remark();
+
+	std::string fail_output = "No real match, library had no motifs that were close enough";
+
+	//pull out the motif library that matches the current motif that we are on by atom names (if there is one)
+	//use map count function to determine if the key exists
+	if ( real_library_section_has_motifs > 0 ) {
+
+		//key exists
+		//pull out motif library at key address and then compare all motifs in the list against ligmotifcop to see if it resembles a real motif
+		protocols::motifs::MotifCOPs real_motifs = mymap[curkey_tuple];
+
+		ms_tr.Debug << "For motif " << ligmotifcop->remark() << " there are " << real_motifs.size() << " motifs in the real library to match against" << std::endl;
+
+		//create a bool that determines if we found a real match for the motif or not
+		bool real_match_found = false;
+
+		//iterate over the library and compare
+		for ( auto realmotifcop : real_motifs ) {
+
+			ms_tr.Debug << "lgnd: " << ligmotifcop->restype_name1() << "," << ligmotifcop->res1_atom1_name() << "," << ligmotifcop->res1_atom2_name() << "," << ligmotifcop->res1_atom3_name() << "," << ligmotifcop->res2_atom1_name() << "," << ligmotifcop->res2_atom2_name() << "," << ligmotifcop->res2_atom3_name() << std::endl;
+			ms_tr.Debug << "real: " << realmotifcop->restype_name1() << "," << realmotifcop->res1_atom1_name() << "," << realmotifcop->res1_atom2_name() << "," << realmotifcop->res1_atom3_name() << "," << realmotifcop->res2_atom1_name() << "," << realmotifcop->res2_atom2_name() << "," << realmotifcop->res2_atom3_name() << std::endl;
+
+
+			//compare code based on remove_duplicate_motifs
+			//difference is that we are not deleting any motifs, instead if we get a match hit, we will call out ligand-derived motif real
+			//secondary confirm that the motifs match (there is no good reason why we should hit a continue off of this if the map is formed right)
+			//no need to check if restype_name2 is equal, since it is expected that those names should be different (from completely different molecules)
+			if ( ligmotifcop->motif_atom_match_lax(*realmotifcop) == false ) continue;
+
+			core::Real motif_distance = 0;
+			core::Real motif_theta = 0;
+
+			jump_distance(ligmotifcop->forward_jump(), realmotifcop->forward_jump(), motif_distance, motif_theta);
+
+			ms_tr.Debug << "Comparing to motif " << realmotifcop->remark() << std::endl;
+			ms_tr.Debug << "Distance: " << motif_distance << std::endl;
+			ms_tr.Debug << "Theta: " << motif_theta << std::endl;
+
+
+			if ( motif_distance <= option[ basic::options::OptionKeys::motifs::duplicate_dist_cutoff ] && motif_theta <= option[ basic::options::OptionKeys::motifs::duplicate_angle_cutoff ] ) {
+				//note that the motif matches a real one
+
+				ms_tr.Debug << "Current motif matches real motif with distance: " << motif_distance << "  and angle difference: "  << motif_theta << std::endl;
+				if ( ligmotifcop->has_remark() ) {
+					ms_tr.Debug << "Ligand remark is: " << ligmotifcop->remark() << std::endl;
+				}
+				if ( realmotifcop->has_remark() ) {
+					ms_tr.Debug << "Real motif remark is: " << realmotifcop->remark() << std::endl;
+				}
+
+
+				//increment real counter
+				//++placement_motifs_data[4];
+
+				std::string real_motif_match_info = "remark: " + realmotifcop->remark() + ", distance: " + std::to_string(motif_distance) + ", angle: " + std::to_string(motif_theta);
+
+				//add comment about real motif match for placement motif
+				//core::pose::add_comment(*working_pose, "Placement motifs: Real motif check - " + ligmotifcop->remark(), real_motif_match_info);
+				
+
+				//real_match_found = true;
+
+				//greedy algorithm, stop for current ligmotifcop when we hit the first match since we got what we wanted
+				//break;
+
+				return std::tuple(true, comment_header, real_motif_match_info);
+			}
+		}
+
+	}
+
+	//return if match not found in any case
+	return std::tuple(false, comment_header, fail_output);
 }

@@ -759,8 +759,8 @@ core::Size LigandDiscoverySearch::discover(std::string output_prefix)
 		}
 
 		//derive motif_library_for_select_residue_ from motif_library and residue in working_pose_ and index working_position
-
-		motif_library_for_select_residue_ = get_motif_sublibrary_by_aa(working_pose_->residue(working_position).name3());
+		//removing this redundant call, since we already do the assignment we need for motif_library_for_select_residue_ in the above else statement that helps guide whether we perform kill_bad_init
+		//motif_library_for_select_residue_ = get_motif_sublibrary_by_aa(working_pose_->residue(working_position).name3());
 
 		//hash the motif library into a map of smaller motif lists based on the residue involved and 6 atom names/types
 		//define new map
@@ -1101,7 +1101,7 @@ core::Size LigandDiscoverySearch::discover(std::string output_prefix)
 								continue;
 							}
 
-							//otherwise, actually try to pull a motif from the ligand against this second residue and see if we do
+							//otherwise, actually try to pull a motif from the ligand against this second residue and see if it matches a real motif
 							//implement this!!!!!
 						}
 
