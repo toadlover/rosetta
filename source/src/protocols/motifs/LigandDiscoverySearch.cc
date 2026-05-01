@@ -1109,7 +1109,7 @@ core::Size LigandDiscoverySearch::discover(std::string output_prefix)
 							MAKE THE POSE
 
 							//make call to ILM single_motif_exists_in_library and set makes_secondary_motif
-							makes_secondary_motif = ilm.single_motif_exists_in_library(fill in);
+							makes_secondary_motif = ilm.residue_forms_library_motif(fill in);
 						}
 
 						//continue to next placement because we fail to make a second motif
