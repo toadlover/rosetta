@@ -76,6 +76,11 @@ public:
 	//mymap is not declared as const because the [] operator is used on it, and apparently you can't [] on a constant map
 	utility::vector1< core::Real > evaluate_motifs_of_pose(core::pose::PoseOP working_pose, std::map<protocols::motifs::motif_atoms,protocols::motifs::MotifCOPs> mymap, std::string const & pdb_name);
 
+	// @brief this function sees if the provided motifCOP exists within a motif library (by jump distance and angle comparison for equivalent matching atoms) that is hashed into a map by atoms
+	// returns a tuple that is a bool noting if the provided motif matches one in the library and 2 strings that are a header and match data (intended to be added to a pose comment, but could be used elsewhere)
+	// Making this a public function, in case a future protocol may want to use this functionality outside of the scope of ILM
+	std::tuple<bool, std::string, std::string> single_motif_exists_in_library(protocols::motifs::MotifCOP ligmotifcop, std::map<protocols::motifs::motif_atoms,protocols::motifs::MotifCOPs> mymap);
+
 private:
 	//protected:
 
