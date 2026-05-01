@@ -877,6 +877,9 @@ utility::vector1< core::Real > IdentifyLigandMotifs::evaluate_motifs_of_pose(cor
 //returns a tuple as a bool for if a motif match was found and corresponding strings that detail the hit result (intended use is to add to pose comments, but you can do whatever you want with strings)
 std::tuple<bool, std::string, std::string> single_motif_exists_in_library(protocols::motifs::MotifCOP ligmotifcop, std::map<protocols::motifs::motif_atoms,protocols::motifs::MotifCOPs> mymap)
 {
+	//create tracer to identify points of the run
+	static basic::Tracer ms_tr( "protocols.motifs.IdentifyLigandMotifs.single_motif_exists_in_library", basic::t_info );
+
 	//derive tuple key
 	protocols::motifs::motif_atoms curkey_tuple(ligmotifcop->restype_name1(),ligmotifcop->res1_atom1_name(),ligmotifcop->res1_atom2_name(),ligmotifcop->res1_atom3_name(),ligmotifcop->res2_atom1_name(),ligmotifcop->res2_atom2_name(),ligmotifcop->res2_atom3_name());
 
@@ -963,10 +966,31 @@ std::tuple<bool, std::string, std::string> single_motif_exists_in_library(protoc
 // Function to take a pose and only see if motifs are made and if they exist in a provided library map
 // Effectively a simplified and streamlined version of evaluate_motifs_of_pose
 // Must provide a pose, because a pose is needed for residue-ligand packing/hbond energy calculations
-// only pulls motifs using ligand_to_residue_analysis() (main function called within process_for_motifs) to collect motifs from a single residue against a ligand
+// only pulls motifs using process_for_motifs() to collect motifs from a single residue against a ligand
 // will then use single_motif_exists_in_library() to see if the motif exists in a larger motif library
 // returns a bool indicating whether any motifs were found for the residue-ligand pair in the library
-bool residue_forms_library_motif()
+bool residue_forms_library_motif(core::pose::PoseOP pose, std::map<protocols::motifs::motif_atoms,protocols::motifs::MotifCOPs> mymap)
 {
-	
+	// make a new motif_library to use to contain the motif(s) pulled from 
+	protocols::motifs::MotifLibrary pose_motif_library;
+
+	//make vector that holds the indices of residues that contribute to motifs (probably the easiest way to track if motifs were made on residues of interest)
+	utility::vector1< core::Size > prot_pos_that_made_motifs_size = process_for_motifs(*pose, "ligand_minipose", pose_motif_library);
+
+	//add all motifs in pose_motif_library to motif_library_
+	//convert the motif library to motifCOPS
+	protocols::motifs::MotifCOPs placement_libraryCOPs = pose_motif_library.library();
+
+	//iterate over all motifs made to see if they exist in the map
+	for ( auto ligmotifcop : placement_libraryCOPs ) {
+		//call 
+		std::tuple<bool, std::string, std::string> results = single_motif_exists_in_library(ligmotifcop, mymap);
+
+		//return true that we found a motif
+		if ( std::get<0>(results) )
+		{
+			return true;			
+		}	
+	}
+	return false;
 }
