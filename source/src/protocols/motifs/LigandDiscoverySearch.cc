@@ -1106,6 +1106,10 @@ core::Size LigandDiscoverySearch::discover(std::string output_prefix)
 
 							//make a temporary pose that has the residue and the ligand
 							//a pose is required (instead of just residue objects) for ligand-residue energy calculations in motif identification (the core code needs a pose to work with score functions)
+							MAKE THE POSE
+
+							//make call to ILM single_motif_exists_in_library and set makes_secondary_motif
+							makes_secondary_motif = ilm.single_motif_exists_in_library(fill in);
 						}
 
 						//continue to next placement because we fail to make a second motif
