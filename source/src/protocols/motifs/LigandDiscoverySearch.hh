@@ -217,7 +217,7 @@ private:
 
 	// @brief function used to make a minipose (focused pose around placed ligand to get quicker scoring of metrics like fa_atr and fa_rep)
 	//if returns true, a minipose was successfully made; if returns false, minipose is still empty because no other residues were recruited to it
-	bool make_secondary_minipose(core::pose::PoseOP & minipose, const core::Size exclude_working_residue);
+	void make_secondary_minipose(core::pose::PoseOP & minipose, const core::Size exclude_working_residue);
 
 	// @brief create a constraint set on the 3 ligand motif atoms (the last residue in working_pose_) to reduce their movement before applying a highresdock
 	void add_constraints_to_working_pose(const core::Size trip_atom_1, const core::Size trip_atom_2, const core::Size trip_atom_3, const core::Size working_position, const core::conformation::ResidueOP ligresOP);

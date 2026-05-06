@@ -551,7 +551,7 @@ bool LigandDiscoverySearch::make_minipose(core::pose::PoseOP & minipose, const c
 
 // @brief function used to make a minipose (focused pose around placed ligand to get quicker scoring of metrics like fa_atr and fa_rep)
 //if returns true, a minipose was successfully made; if returns false, minipose is still empty because no other residues were recruited to it
-bool LigandDiscoverySearch::make_secondary_minipose(core::pose::PoseOP & minipose, const core::Size exclude_working_residue)
+void LigandDiscoverySearch::make_secondary_minipose(core::pose::PoseOP & minipose, const core::Size exclude_working_residue)
 {
 	ms_tr.Debug << "Building Secondary Minipose made of residue indices: ";
 
