@@ -504,7 +504,7 @@ bool LigandDiscoverySearch::make_minipose(core::pose::PoseOP & minipose, const c
 {
 	working_pose_->append_residue_by_jump(*ligresOP, 1);
 
-	ms_tr.Debug << "Builting Minipose made of residue indices: ";
+	ms_tr.Debug << "Building Minipose made of residue indices: ";
 
 	for ( core::Size resi_pos = 1; resi_pos < working_pose_->size(); ++resi_pos ) {
 		//code breaks if unmatched disulfide  bonds form, just place all  residues that can have the disulfide type
@@ -547,6 +547,42 @@ bool LigandDiscoverySearch::make_minipose(core::pose::PoseOP & minipose, const c
 	minipose->delete_residue_slow(minipose->size());
 	working_pose_->delete_residue_slow(working_pose_->size());
 	return true;
+}
+
+// @brief function used to make a minipose (focused pose around placed ligand to get quicker scoring of metrics like fa_atr and fa_rep)
+//if returns true, a minipose was successfully made; if returns false, minipose is still empty because no other residues were recruited to it
+bool LigandDiscoverySearch::make_secondary_minipose(core::pose::PoseOP & minipose, const core::Size exclude_working_residue)
+{
+	ms_tr.Debug << "Building Secondary Minipose made of residue indices: ";
+
+	for ( core::Size resi_pos = 1; resi_pos < secondary_working_positions_->size(); ++resi_pos ) {
+		//ensure that this is a legal position within the working_pose_
+		if ( secondary_working_positions_[resi_pos] > working_pose_->size() ) {
+			ms_tr.Warning << "Warning: Requested residue index " << secondary_working_positions_[resi_pos] << " is beyond the number of residues in provided PDB of size: " << working_pose_->size() << std::endl;
+			continue;			
+		}
+
+		//code breaks if unmatched disulfide  bonds form, just place all residues that can have the disulfide type
+		if ( working_pose_->residue(resi_pos).has_variant_type(core::chemical::DISULFIDE) ) {
+			ms_tr.Warning << "Warning: Skipping risky residue index " << secondary_working_positions_[resi_pos] << " that will try to form a disulfide bond and will break the pipeline." << std::endl;
+			continue;
+		}
+
+		//final potential exclusion to not include the residue if it is also the working residue index (don't include the working residue so we don't try to )
+		if ( secondary_working_positions_[resi_pos] == exclude_working_residue )
+		{
+			ms_tr.Warning << "Minor Warning: Skipping residue index " << secondary_working_positions_[resi_pos] << " for generating this secondary residue minipose because it is the working residue. This will not work as a secondary anchor." << std::endl;
+			continue;			
+		}
+
+		//if we pass all of these filters, add the residue to the minipose
+		minipose->append_residue_by_jump(working_pose_->residue(secondary_working_positions_[resi_pos]), 1);
+
+		ms_tr.Debug << secondary_working_positions_[resi_pos] << ", ";
+	}
+
+	//dump the secondary minipose for debugging
+	core::io::pdb::dump_pdb( *minipose, "secondary_minipose_excludes_resi_" + std::to_string(exclude_working_residue) + ".pdb");
 }
 
 // @brief function to score the minipose iteratively on fa_rep, fa_atr, and fa_atr+fa_rep
@@ -723,7 +759,6 @@ core::Size LigandDiscoverySearch::discover(std::string output_prefix)
 
 		ms_tr << "Current anchor residue position: " << working_position << std::endl;
 
-
 		//declare empty discovery_position_residue name that will be properly written in initialization
 		std::string discovery_position_residue = "";
 
@@ -757,6 +792,22 @@ core::Size LigandDiscoverySearch::discover(std::string output_prefix)
 
 			return -1;
 		}
+
+		//seed a mini pose that contains only the residues in the secondary_working_position list (which could be empty)
+		//writing this within the scope of the discover function, since I don't see a reason to have this live beyond the scope (much like the minipose)
+		//making this within the working_positions_ loop so that we can make a new pose on each iteration and ensure that we exclude the working residue from the created pose
+		core::pose::PoseOP secondary_motif_minipose(new pose::Pose);
+
+		//fill the minipose if there are secondary residues provided by the user (otherwise it will be anyway, so just quickly gate by the vector size)
+		if ( secondary_working_positions_.size() > 0 ) {
+			ms_tr.Debug << "Making minipose from secondary_working_positions_ vector residues. Excludes working residue: " << working_position << std::endl;
+			make_secondary_minipose(secondary_motif_minipose, working_position);
+		}
+
+		//make a copy of the secondary motif minipose with residues in it
+		//this will be used as a checkpoint to revert the original back to after a ligand residue is added to it (reassignment to this checkpoint should be faster than deleting the residue off the pose)
+		core::pose::PoseOP secondary_motif_minipose_nolig(new pose::Pose);
+		secondary_motif_minipose_nolig = *((*secondary_motif_minipose).clone());
 
 		//derive motif_library_for_select_residue_ from motif_library and residue in working_pose_ and index working_position
 		//removing this redundant call, since we already do the assignment we need for motif_library_for_select_residue_ in the above else statement that helps guide whether we perform kill_bad_init
@@ -1094,23 +1145,14 @@ core::Size LigandDiscoverySearch::discover(std::string output_prefix)
 						//boolean to determine if we make a motif with any of the other secondary working positions
 						bool makes_secondary_motif = false;
 
-						//iterate over each residue index in the secondary_working_positions_
-						for ( const auto & secondary_working_position : secondary_working_positions_ ) {
-							//make sure that the iterated secondary position is not the same as the workign anchor
-							if ( secondary_working_position == working_position ) {
-								continue;
-							}
+						//add the ligand to the secondary minipose
+						secondary_motif_minipose->append_residue_by_jump(*ligresOP, 1);
 
-							//otherwise, actually try to pull a motif from the ligand against this second residue and see if it matches a real motif
-							//implement this!!!!!
+						//make call to ILM residue_forms_library_motif and set makes_secondary_motif
+						makes_secondary_motif = ilm.residue_forms_library_motif(secondary_motif_minipose, mymap);
 
-							//make a temporary pose that has the residue and the ligand
-							//a pose is required (instead of just residue objects) for ligand-residue energy calculations in motif identification (the core code needs a pose to work with score functions)
-							MAKE THE POSE
-
-							//make call to ILM single_motif_exists_in_library and set makes_secondary_motif
-							makes_secondary_motif = ilm.residue_forms_library_motif(fill in);
-						}
+						//remove the ligand placement by assigning from the nolig version
+						secondary_motif_minipose = secondary_motif_minipose_nolig.clone();
 
 						//continue to next placement because we fail to make a second motif
 						if ( makes_secondary_motif == false ) {

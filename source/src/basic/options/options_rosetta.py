@@ -7210,6 +7210,7 @@ EX_SIX_QUARTER_STEP_STDDEVS   7          +/- 0.25, 0.5, 0.75, 1, 1.25 & 1.5 sd; 
 		Option( 'minimum_ratio_of_real_motifs_from_ligand', 'Real', default = '0', desc = 'If checking that motifs from placed ligand match motifs in inputted library, ratio cutoff for how many must match real to keep ligand'),
 		Option( 'clean_pdb_name', 'Boolean', default = 'true', desc = 'Use a cleaner naming scheme for naming the pdbs that are produced by liganddiscoverysearch'),
 		Option( 'secondary_protein_discovery_locus', 'IntegerVector', desc = 'An optional secondary integer list of residue indices, which forces ligand interactions with a specified second residue before further investigating the pose. If this flag is used, after a residue is docked against a residue from protein_discovery_locus, LigandDiscoverySearch will try to collect a motif against the ligand and these residue indices. If a motif is identified, the pose will be considered for further investigation.'),
+		Option( 'dump_input_pdb_with_rosetta_residue_indices', 'Boolean', default = 'false', desc = 'A debug boolean to allow the user to spit out the starting empty receptor pose with no ligand. The purpose of this is to have an easy way to get a copy of the empty pose with all residues translated to Rosetta indexing (since it is very likely that the indices are different unless they index from 1 with no skipping).'),
 		
 	), # -motifs
 

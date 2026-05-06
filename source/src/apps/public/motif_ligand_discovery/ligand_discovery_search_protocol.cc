@@ -253,7 +253,12 @@ main( int argc, char * argv [] )
 				utility::vector1<core::Size> secondary_discovery_position = option[ OptionKeys::motifs::secondary_protein_discovery_locus ]();
 				//use vector overload of setter
 				lds.set_secondary_working_positions(secondary_discovery_position);
-			}			
+			}
+
+			//debug option to easily spit out the empty receptor that has residue indices converted to Rosetta indexing 
+			if ( option[ OptionKeys::motifs::dump_input_pdb_with_rosetta_residue_indices ].user() ) {
+				core::io::pdb::dump_pdb(*pose, "empty_rosettaindices_" pdbprefix + ".pdb");
+			}
 
 			//run discovery
 			ms_tr << "Running discovery for " << pdbprefix << std::endl;
