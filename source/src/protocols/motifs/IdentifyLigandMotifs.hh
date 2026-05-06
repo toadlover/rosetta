@@ -76,6 +76,14 @@ public:
 	//mymap is not declared as const because the [] operator is used on it, and apparently you can't [] on a constant map
 	utility::vector1< core::Real > evaluate_motifs_of_pose(core::pose::PoseOP working_pose, std::map<protocols::motifs::motif_atoms,protocols::motifs::MotifCOPs> mymap, std::string const & pdb_name);
 
+	// @brief Function to take a pose and only see if motifs are made and if they exist in a provided library map
+	// Effectively a simplified and streamlined version of evaluate_motifs_of_pose
+	// Must provide a pose, because a pose is needed for residue-ligand packing/hbond energy calculations
+	// only pulls motifs using process_for_motifs() to collect motifs from a single residue against a ligand
+	// will then use single_motif_exists_in_library() to see if the motif exists in a larger motif library
+	// returns a bool indicating whether any motifs were found for the residue-ligand pair in the library
+	bool residue_forms_library_motif(core::pose::PoseOP pose, std::map<protocols::motifs::motif_atoms,protocols::motifs::MotifCOPs> mymap);
+
 	// @brief this function sees if the provided motifCOP exists within a motif library (by jump distance and angle comparison for equivalent matching atoms) that is hashed into a map by atoms
 	// returns a tuple that is a bool noting if the provided motif matches one in the library and 2 strings that are a header and match data (intended to be added to a pose comment, but could be used elsewhere)
 	// Making this a public function, in case a future protocol may want to use this functionality outside of the scope of ILM

@@ -555,7 +555,7 @@ bool LigandDiscoverySearch::make_secondary_minipose(core::pose::PoseOP & minipos
 {
 	ms_tr.Debug << "Building Secondary Minipose made of residue indices: ";
 
-	for ( core::Size resi_pos = 1; resi_pos < secondary_working_positions_->size(); ++resi_pos ) {
+	for ( core::Size resi_pos = 1; resi_pos < secondary_working_positions_.size(); ++resi_pos ) {
 		//ensure that this is a legal position within the working_pose_
 		if ( secondary_working_positions_[resi_pos] > working_pose_->size() ) {
 			ms_tr.Warning << "Warning: Requested residue index " << secondary_working_positions_[resi_pos] << " is beyond the number of residues in provided PDB of size: " << working_pose_->size() << std::endl;
@@ -806,7 +806,7 @@ core::Size LigandDiscoverySearch::discover(std::string output_prefix)
 
 		//make a copy of the secondary motif minipose with residues in it
 		//this will be used as a checkpoint to revert the original back to after a ligand residue is added to it (reassignment to this checkpoint should be faster than deleting the residue off the pose)
-		core::pose::PoseOP secondary_motif_minipose_nolig(new pose::Pose);
+		core::pose::Pose secondary_motif_minipose_nolig;
 		secondary_motif_minipose_nolig = *((*secondary_motif_minipose).clone());
 
 		//derive motif_library_for_select_residue_ from motif_library and residue in working_pose_ and index working_position
