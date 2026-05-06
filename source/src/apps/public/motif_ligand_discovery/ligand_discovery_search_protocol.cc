@@ -257,7 +257,7 @@ main( int argc, char * argv [] )
 
 			//debug option to easily spit out the empty receptor that has residue indices converted to Rosetta indexing 
 			if ( option[ OptionKeys::motifs::dump_input_pdb_with_rosetta_residue_indices ].user() ) {
-				core::io::pdb::dump_pdb(*pose, "empty_rosettaindices_" pdbprefix + ".pdb");
+				core::io::pdb::dump_pdb(*pose, "empty_rosettaindices_" + pdbprefix + ".pdb");
 			}
 
 			//run discovery
