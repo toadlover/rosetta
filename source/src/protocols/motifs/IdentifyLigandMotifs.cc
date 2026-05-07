@@ -221,6 +221,7 @@ IdentifyLigandMotifs::output_single_motif_to_MotifLibrary(
 )
 {
 	core::Size prot_pos_pdb( src_pose.pdb_info()->number( prot_pos ) );
+	TR.Debug << "Residue number: prot_pos_pdb: " << prot_pos_pdb << std::endl;
 
 	conformation::Residue const & protres( src_pose.residue( prot_pos ) );
 	conformation::Residue const & ligres( src_pose.residue( lig_pos ) );
@@ -238,6 +239,7 @@ IdentifyLigandMotifs::output_single_motif_to_MotifLibrary(
 	}
 	*/
 
+	TR.Debug << "Making motif the ligand residue " << lig_pos << " and protein residue " << prot_pos << std::endl;
 	protocols::motifs::Motif motif(protres, ligres, lig_atoms);
 
 	//add a remark to the motif so that more is known about it and can  be called later
