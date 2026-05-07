@@ -221,7 +221,18 @@ IdentifyLigandMotifs::output_single_motif_to_MotifLibrary(
 )
 {
 	TR.Debug << "Trying to find prot_pos_pdb from prot_pos: " << prot_pos << std::endl;
-	core::Size prot_pos_pdb( src_pose.pdb_info()->number( prot_pos ) );
+	//core::Size prot_pos_pdb( src_pose.pdb_info()->number( prot_pos ) );
+	core::Size prot_pos_pdb = prot_pos; // safe fallback: pose numbering
+
+	//check if pdbinfo exists
+	// a synthetic pose (like a minipose) may not have pdb info, and trying to extract a rsidue number could break things
+	if ( src_pose.pdb_info() != nullptr ) {
+		core::pose::PDBInfo const & pdb_info = *( src_pose.pdb_info() );
+
+		if ( prot_pos >= 1 && prot_pos <= src_pose.size() && prot_pos <= pdb_info.nres() ) {
+			prot_pos_pdb = pdb_info.number( prot_pos );
+		}
+	}
 	TR.Debug << "Residue number: prot_pos_pdb: " << prot_pos_pdb << std::endl;
 
 	conformation::Residue const & protres( src_pose.residue( prot_pos ) );
@@ -265,10 +276,11 @@ IdentifyLigandMotifs::output_single_motif_to_MotifLibrary(
 	pdb_name_str = build_string;
 
 	std::string res_str = src_pose.residue_type( prot_pos ).name3() + string_of( prot_pos_pdb );
+	std::string res_rosetta_str = "RosettaIndex:" + src_pose.residue_type( prot_pos ).name3() + std::to_string(prot_pos);
 	std::string lig_str = src_pose.residue_type( lig_pos ).name3();
 	std::string score_str = "Packing_score:" + std::to_string(pack_score) + "_Hbond_score:" + std::to_string(hb_score);
 
-	motif.store_remark(pdb_name_str + "_" + res_str + "_" + lig_str + "_" + score_str);
+	motif.store_remark(pdb_name_str + "_" + res_str + "_" + res_rosetta_str + "_" + lig_str + "_" + score_str);
 
 	motifs.add_to_library( motif ); //Add motif to library
 }
