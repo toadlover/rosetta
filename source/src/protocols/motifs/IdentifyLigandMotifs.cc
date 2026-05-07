@@ -220,6 +220,7 @@ IdentifyLigandMotifs::output_single_motif_to_MotifLibrary(
 	core::Real hb_score
 )
 {
+	TR.Debug << "Trying to find prot_pos_pdb from prot_pos: " << prot_pos << std::endl;
 	core::Size prot_pos_pdb( src_pose.pdb_info()->number( prot_pos ) );
 	TR.Debug << "Residue number: prot_pos_pdb: " << prot_pos_pdb << std::endl;
 
