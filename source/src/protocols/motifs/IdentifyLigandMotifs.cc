@@ -747,7 +747,7 @@ IdentifyLigandMotifs::write_motifs_to_disk()
 // 4. Checks if the motifs collected are comparable to another list of motifs (i.e. used to see if motifs match a motif library that was collected from the Protein Data Bank)
 // Data is written to the pose in comments
 // At least for now, it does not seem necessary to pass along the motifs that were collected from the input pose, so we won't do that (but the functionality is possible and should be as easy as throwing in a motiflibrary into the arguments that is passed by reference)
-utility::vector1< core::Real > IdentifyLigandMotifs::evaluate_motifs_of_pose(core::pose::PoseOP working_pose, std::map<protocols::motifs::motif_atoms,protocols::motifs::MotifCOPs> mymap, std::string const & pdb_name)
+utility::vector1< core::Real > IdentifyLigandMotifs::evaluate_motifs_of_pose(core::pose::PoseOP const & working_pose, std::map<protocols::motifs::motif_atoms,protocols::motifs::MotifCOPs> const & mymap, std::string const & pdb_name)
 {
 	//create tracer to identify points of the run
 	static basic::Tracer ms_tr( "protocols.motifs.IdentifyLigandMotifs.evaluate_motifs_of_pose", basic::t_info );
@@ -907,7 +907,7 @@ utility::vector1< core::Real > IdentifyLigandMotifs::evaluate_motifs_of_pose(cor
 
 //this function serves to see if a motif exists in a motif library map
 //returns a tuple as a bool for if a motif match was found and corresponding strings that detail the hit result (intended use is to add to pose comments, but you can do whatever you want with strings)
-std::tuple<bool, std::string, std::string> IdentifyLigandMotifs::single_motif_exists_in_library(protocols::motifs::MotifCOP ligmotifcop, std::map<protocols::motifs::motif_atoms,protocols::motifs::MotifCOPs> mymap)
+std::tuple<bool, std::string, std::string> IdentifyLigandMotifs::single_motif_exists_in_library(protocols::motifs::MotifCOP const & ligmotifcop, std::map<protocols::motifs::motif_atoms,protocols::motifs::MotifCOPs> const & mymap)
 {
 	//create tracer to identify points of the run
 	static basic::Tracer ms_tr( "protocols.motifs.IdentifyLigandMotifs.single_motif_exists_in_library", basic::t_info );
@@ -1001,7 +1001,7 @@ std::tuple<bool, std::string, std::string> IdentifyLigandMotifs::single_motif_ex
 // only pulls motifs using process_for_motifs() to collect motifs from a single residue against a ligand
 // will then use single_motif_exists_in_library() to see if the motif exists in a larger motif library
 // returns a bool indicating whether any motifs were found for the residue-ligand pair in the library
-bool IdentifyLigandMotifs::residue_forms_library_motif(core::pose::PoseOP pose, std::map<protocols::motifs::motif_atoms,protocols::motifs::MotifCOPs> mymap)
+bool IdentifyLigandMotifs::residue_forms_library_motif(core::pose::PoseOP const & pose, std::map<protocols::motifs::motif_atoms,protocols::motifs::MotifCOPs> const & mymap)
 {
 	// make a new motif_library to use to contain the motif(s) pulled from 
 	protocols::motifs::MotifLibrary pose_motif_library;
