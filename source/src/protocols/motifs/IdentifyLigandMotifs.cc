@@ -296,8 +296,25 @@ IdentifyLigandMotifs::output_single_motif_to_pdb(
 )
 {
 
-	core::Size prot_pos_pdb( src_pose.pdb_info()->number( prot_pos ) );
-	char prot_pos_chain( src_pose.pdb_info()->chain( prot_pos ) );
+	//core::Size prot_pos_pdb( src_pose.pdb_info()->number( prot_pos ) );
+	//char prot_pos_chain( src_pose.pdb_info()->chain( prot_pos ) );
+
+	TR.Debug << "Trying to find prot_pos_pdb from prot_pos: " << prot_pos << std::endl;
+	//core::Size prot_pos_pdb( src_pose.pdb_info()->number( prot_pos ) );
+	core::Size prot_pos_pdb = prot_pos; // safe fallback: pose numbering
+	char prot_pos_chain = 'A';
+
+	//check if pdbinfo exists
+	// a synthetic pose (like a minipose) may not have pdb info, and trying to extract a rsidue number could break things
+	if ( src_pose.pdb_info() != nullptr ) {
+		core::pose::PDBInfo const & pdb_info = *( src_pose.pdb_info() );
+
+		if ( prot_pos >= 1 && prot_pos <= src_pose.size() && prot_pos <= pdb_info.nres() ) {
+			prot_pos_pdb = pdb_info.number( prot_pos );
+			prot_pos_chain = pdb_info.chain( prot_pos );
+		}
+	}
+	TR.Debug << "Residue number: prot_pos_pdb: " << prot_pos_pdb << std::endl;
 
 	//need to figure out how to change the output path to something customizable in the flags
 	//std::string output_path( "Ligand_motif_dir/" );
