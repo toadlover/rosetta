@@ -793,22 +793,6 @@ core::Size LigandDiscoverySearch::discover(std::string output_prefix)
 			return -1;
 		}
 
-		//seed a mini pose that contains only the residues in the secondary_working_position list (which could be empty)
-		//writing this within the scope of the discover function, since I don't see a reason to have this live beyond the scope (much like the minipose)
-		//making this within the working_positions_ loop so that we can make a new pose on each iteration and ensure that we exclude the working residue from the created pose
-		core::pose::PoseOP secondary_motif_minipose(new pose::Pose);
-
-		//fill the minipose if there are secondary residues provided by the user (otherwise it will be anyway, so just quickly gate by the vector size)
-		if ( secondary_working_positions_.size() > 0 ) {
-			ms_tr.Debug << "Making minipose from secondary_working_positions_ vector residues. Excludes working residue: " << working_position << std::endl;
-			make_secondary_minipose(secondary_motif_minipose, working_position);
-		}
-
-		//make a copy of the secondary motif minipose with residues in it
-		//this will be used as a checkpoint to revert the original back to after a ligand residue is added to it (reassignment to this checkpoint should be faster than deleting the residue off the pose)
-		core::pose::Pose secondary_motif_minipose_nolig;
-		secondary_motif_minipose_nolig = *((*secondary_motif_minipose).clone());
-
 		//derive motif_library_for_select_residue_ from motif_library and residue in working_pose_ and index working_position
 		//removing this redundant call, since we already do the assignment we need for motif_library_for_select_residue_ in the above else statement that helps guide whether we perform kill_bad_init
 		//motif_library_for_select_residue_ = get_motif_sublibrary_by_aa(working_pose_->residue(working_position).name3());
@@ -1145,14 +1129,23 @@ core::Size LigandDiscoverySearch::discover(std::string output_prefix)
 						//boolean to determine if we make a motif with any of the other secondary working positions
 						bool makes_secondary_motif = false;
 
-						//add the ligand to the secondary minipose
-						secondary_motif_minipose->append_residue_by_jump(*ligresOP, 1);
+						// iterate over each position (and residue) in the secondary_working_positions_ list
+						for ( const auto & secondary_working_position : secondary_working_positions_ ) {
 
-						//make call to ILM residue_forms_library_motif and set makes_secondary_motif
-						makes_secondary_motif = ilm.residue_forms_library_motif(secondary_motif_minipose, mymap);
+							ms_tr.Debug << "Checking for secondary motif against residue: " << secondary_working_position << std::endl;
 
-						//remove the ligand placement by assigning from the nolig version
-						secondary_motif_minipose = secondary_motif_minipose_nolig.clone();
+							//make call to ILM placed_ligand_forms_library_motif_fast to see if we make a motif off the residue with the ligand
+							makes_secondary_motif = ilm.placed_ligand_forms_library_motif_fast(*ligresOP, working_pose_->residue(secondary_working_position), ligand_atom_trios, mymap);
+
+							ms_tr.Debug << "Makes motif against residue = " << makes_secondary_motif << std::endl;
+
+							//break if we do successfully make a secondary motif
+							if ( makes_secondary_motif ) {
+								break;
+							}
+
+
+						}
 
 						//continue to next placement because we fail to make a second motif
 						if ( makes_secondary_motif == false ) {

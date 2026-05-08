@@ -89,6 +89,11 @@ public:
 	// Making this a public function, in case a future protocol may want to use this functionality outside of the scope of ILM
 	std::tuple<bool, std::string, std::string> single_motif_exists_in_library(protocols::motifs::MotifCOP const & ligmotifcop, std::map<protocols::motifs::motif_atoms,protocols::motifs::MotifCOPs> const & mymap);
 
+	// @brief a quick check to see if a ligand is close enough to the provided residue to make a motif
+	// makes a motif (without performing energy scores) and makes a call to see if the motif is geometrically similar to a motif that exists in the provided motif library (lives in mymap)
+	// returns true if a real motif in mymap exists, false if not
+	bool placed_ligand_forms_library_motif_fast(core::conformation::Residue const & ligres, core::conformation::Residue const & secondary_residue, utility::vector1<utility::vector1<utility::vector1<core::Size>>> const & ligand_trios, std::map< protocols::motifs::motif_atoms, protocols::motifs::MotifCOPs > const & mymap);
+
 private:
 	//protected:
 

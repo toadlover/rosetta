@@ -1026,3 +1026,68 @@ bool IdentifyLigandMotifs::residue_forms_library_motif(core::pose::PoseOP const 
 	}
 	return false;
 }
+
+
+// @brief a quick check to see if a ligand is close enough to the provided residue to make a motif
+// makes a motif (without performing energy scores) and makes a call to see if the motif is geometrically similar to a motif that exists in the provided motif library (lives in mymap)
+// returns true if a real motif in mymap exists, false if not
+bool
+IdentifyLigandMotifs::placed_ligand_forms_library_motif_fast(
+	core::conformation::Residue const & ligres,
+	core::conformation::Residue const & secondary_residue,
+	utility::vector1<utility::vector1<utility::vector1<core::Size>>> const & ligand_trios,
+	std::map< protocols::motifs::motif_atoms, protocols::motifs::MotifCOPs > const & mymap
+)
+{
+
+	//make sure the secondary residue is an amino acid and not glycine (since glycine does not form motifs)
+	if ( !secondary_residue.is_protein() ) continue;
+	if ( secondary_residue.name3() == "GLY" ) continue;
+
+	// Cheap residue-level distance gate first
+	core::Real nbr_cutoff = 1.5 * ( ligres.nbr_radius() + secondary_residue.nbr_radius() );
+	core::Real nbr_dist = ligres.nbr_atom_xyz().distance( secondary_residue.nbr_atom_xyz() );
+
+	//abort if ligand is outright too far from the secondary residue
+	if ( nbr_dist > nbr_cutoff ) {
+		continue;
+	}
+
+	for ( auto const & trio : ligand_trios ) {
+
+		// Cheap atom-level distance gate
+		bool close_enough = false;
+
+		for ( core::Size trio_i = 1; trio_i <= trio.size(); ++trio_i ) {
+			core::Size lig_atom = trio[trio_i];
+
+			for ( core::Size prot_atom = 1; prot_atom <= secondary_residue.nheavyatoms(); ++prot_atom ) {
+				core::Real d = ligres.xyz(lig_atom).distance( secondary_residue.xyz(prot_atom) );
+
+				if ( d < 4.0 ) {
+					close_enough = true;
+					break;
+				}
+			}
+
+			if ( close_enough ) break;
+		}
+
+		if ( !close_enough ) {
+			continue;
+		}
+
+		//make a motif without calculating energy and turn into a motifCOP
+		protocols::motifs::Motif motif( secondary_residue, ligres, trio );
+		protocols::motifs::MotifCOP motifcop =
+			utility::pointer::make_shared< protocols::motifs::Motif const >( motif );
+
+		//see if the motif matches a motif from within mymap
+		if ( std::get<0>( single_motif_exists_in_library(motifcop, mymap) ) ) {
+			return true;
+		}
+	}
+	
+
+	return false;
+}
