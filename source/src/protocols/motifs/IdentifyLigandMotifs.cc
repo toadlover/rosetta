@@ -918,7 +918,8 @@ std::tuple<bool, std::string, std::string> IdentifyLigandMotifs::single_motif_ex
 	ms_tr.Debug << "lgnd start: " << ligmotifcop->restype_name1() << "," << ligmotifcop->res1_atom1_name() << "," << ligmotifcop->res1_atom2_name() << "," << ligmotifcop->res1_atom3_name() << "," << ligmotifcop->res2_atom1_name() << "," << ligmotifcop->res2_atom2_name() << "," << ligmotifcop->res2_atom3_name() << std::endl;
 
 	//count the number of motifs in the real library that have the same residue and all 6 atom types
-	core::Size real_library_section_has_motifs = mymap.count(curkey_tuple);
+	//core::Size real_library_section_has_motifs = mymap.count(curkey_tuple);
+	auto const iter = mymap.find(curkey_tuple);
 
 	//output header of motif
 	std::string comment_header = "Placement motifs: Real motif check - " + ligmotifcop->remark();
@@ -927,11 +928,13 @@ std::tuple<bool, std::string, std::string> IdentifyLigandMotifs::single_motif_ex
 
 	//pull out the motif library that matches the current motif that we are on by atom names (if there is one)
 	//use map count function to determine if the key exists
-	if ( real_library_section_has_motifs > 0 ) {
+	//if ( real_library_section_has_motifs > 0 ) {
+	if ( iter != mymap.end() ) {
 
 		//key exists
 		//pull out motif library at key address and then compare all motifs in the list against ligmotifcop to see if it resembles a real motif
-		protocols::motifs::MotifCOPs real_motifs = mymap[curkey_tuple];
+		//protocols::motifs::MotifCOPs real_motifs = mymap[curkey_tuple];
+		protocols::motifs::MotifCOPs const & real_motifs = iter->second;
 
 		ms_tr.Debug << "For motif " << ligmotifcop->remark() << " there are " << real_motifs.size() << " motifs in the real library to match against" << std::endl;
 
