@@ -1132,6 +1132,13 @@ core::Size LigandDiscoverySearch::discover(std::string output_prefix)
 						// iterate over each position (and residue) in the secondary_working_positions_ list
 						for ( const auto & secondary_working_position : secondary_working_positions_ ) {
 
+							//skip here if the secondary_working_position and working_position are not the same so we are not taking motifs off the workign position (since we should obviously get one back)
+							//this could realistically be encountered if using multiple primary anchor residues, and you include the any primary anchor indices in the secondary list 
+							if ( secondary_working_position == working_position ) {
+								ms_tr.Debug << "Skipping check for secondary motif on residue " << secondary_working_position << ", since it is the working anchor." << std::endl;
+								continue;
+							}
+
 							ms_tr.Debug << "Checking for secondary motif against residue: " << secondary_working_position << std::endl;
 
 							//make call to ILM placed_ligand_forms_library_motif_fast to see if we make a motif off the residue with the ligand
