@@ -942,7 +942,7 @@ std::tuple<bool, std::string, std::string> IdentifyLigandMotifs::single_motif_ex
 		bool real_match_found = false;
 
 		//iterate over the library and compare
-		for ( auto realmotifcop : real_motifs ) {
+		for ( auto const & realmotifcop : real_motifs ) {
 
 			ms_tr.Debug << "lgnd: " << ligmotifcop->restype_name1() << "," << ligmotifcop->res1_atom1_name() << "," << ligmotifcop->res1_atom2_name() << "," << ligmotifcop->res1_atom3_name() << "," << ligmotifcop->res2_atom1_name() << "," << ligmotifcop->res2_atom2_name() << "," << ligmotifcop->res2_atom3_name() << std::endl;
 			ms_tr.Debug << "real: " << realmotifcop->restype_name1() << "," << realmotifcop->res1_atom1_name() << "," << realmotifcop->res1_atom2_name() << "," << realmotifcop->res1_atom3_name() << "," << realmotifcop->res2_atom1_name() << "," << realmotifcop->res2_atom2_name() << "," << realmotifcop->res2_atom3_name() << std::endl;
