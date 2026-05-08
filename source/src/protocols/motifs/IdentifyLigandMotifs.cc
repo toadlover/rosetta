@@ -1041,8 +1041,8 @@ IdentifyLigandMotifs::placed_ligand_forms_library_motif_fast(
 {
 
 	//make sure the secondary residue is an amino acid and not glycine (since glycine does not form motifs)
-	if ( !secondary_residue.is_protein() ) continue;
-	if ( secondary_residue.name3() == "GLY" ) continue;
+	if ( !secondary_residue.is_protein() ) return false;
+	if ( secondary_residue.name3() == "GLY" ) return false;
 
 	// Cheap residue-level distance gate first
 	core::Real nbr_cutoff = 1.5 * ( ligres.nbr_radius() + secondary_residue.nbr_radius() );
@@ -1050,7 +1050,7 @@ IdentifyLigandMotifs::placed_ligand_forms_library_motif_fast(
 
 	//abort if ligand is outright too far from the secondary residue
 	if ( nbr_dist > nbr_cutoff ) {
-		continue;
+		return false;
 	}
 
 	for ( auto const & trio : ligand_trios ) {
@@ -1059,7 +1059,8 @@ IdentifyLigandMotifs::placed_ligand_forms_library_motif_fast(
 		bool close_enough = false;
 
 		for ( core::Size trio_i = 1; trio_i <= trio.size(); ++trio_i ) {
-			core::Size lig_atom = trio[trio_i];
+			//index 0 corresponds to the atom index, index 1 would correspond to the recorded atom type numerical identifier
+			core::Size lig_atom = trio[trio_i][0];
 
 			for ( core::Size prot_atom = 1; prot_atom <= secondary_residue.nheavyatoms(); ++prot_atom ) {
 				core::Real d = ligres.xyz(lig_atom).distance( secondary_residue.xyz(prot_atom) );
