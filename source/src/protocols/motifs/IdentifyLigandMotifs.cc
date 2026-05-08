@@ -1053,6 +1053,10 @@ IdentifyLigandMotifs::placed_ligand_forms_library_motif_fast(
 		return false;
 	}
 
+	//declare a 1D vector to hold the atom intices of an atom trio to be considered for a motif
+	//seed as 3 values that are 0
+	utility::vector1<core::Size> atom_trio_indices (3,0);
+
 	for ( auto const & trio : ligand_trios ) {
 
 		// Cheap atom-level distance gate
@@ -1060,7 +1064,7 @@ IdentifyLigandMotifs::placed_ligand_forms_library_motif_fast(
 
 		for ( core::Size trio_i = 1; trio_i <= trio.size(); ++trio_i ) {
 			//index 0 corresponds to the atom index, index 1 would correspond to the recorded atom type numerical identifier
-			core::Size lig_atom = trio[trio_i][0];
+			core::Size lig_atom = trio[trio_i][1];
 
 			for ( core::Size prot_atom = 1; prot_atom <= secondary_residue.nheavyatoms(); ++prot_atom ) {
 				core::Real d = ligres.xyz(lig_atom).distance( secondary_residue.xyz(prot_atom) );
@@ -1078,8 +1082,13 @@ IdentifyLigandMotifs::placed_ligand_forms_library_motif_fast(
 			continue;
 		}
 
+		//if we are going to investigate a motif with the 3 atoms in this trio, seed the vector with the atom indices in the trio
+		atom_trio_indices[1] = trio[1][1];
+		atom_trio_indices[2] = trio[2][1];
+		atom_trio_indices[3] = trio[3][1];
+
 		//make a motif without calculating energy and turn into a motifCOP
-		protocols::motifs::Motif motif( secondary_residue, ligres, trio );
+		protocols::motifs::Motif motif( secondary_residue, ligres, atom_trio_indices );
 		protocols::motifs::MotifCOP motifcop =
 			utility::pointer::make_shared< protocols::motifs::Motif const >( motif );
 
