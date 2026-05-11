@@ -395,7 +395,7 @@ void ProteinGrid::define_sub_regions()
 // if a sub area boundary is defined, will define that area with different values
 // note: we are not going to re-size the proteinmatrix of measure the volume that exists outside the ProteinMatrix; this could be updated later, but not doing this simplifies the operation
 // a main argument for retaining this as-is is that there is less reason to look at the hwole pose, and usually working with the sub-area only is better, which is less likely to be cut off (only if it is at any edges)
-void ProteinGrid::project_lj_radii(){
+void ProteinGrid::project_lj_radii( core::Real projection_multiplier ){
 
 	//set using lj radii to true
 	using_lj_radii_ = true;
@@ -418,7 +418,7 @@ void ProteinGrid::project_lj_radii(){
 			atom_xyz.z() = std::floor(working_pose_->residue(res_num).xyz(atom_num).z());
 
 			//extract the lj radius as a floating point value, which we will use to project the area about teh atom
-			core::Real atom_lj_radius = working_pose_->residue(res_num).atom_type(atom_num).lj_radius();
+			core::Real atom_lj_radius = working_pose_->residue(res_num).atom_type(atom_num).lj_radius() * projection_multiplier;
 
 			//apply the xyz shift and resolution to the atom coordinates
 			atom_xyz.x() = std::floor((atom_xyz.x() + xyz_shift_[1]) * resolution_);

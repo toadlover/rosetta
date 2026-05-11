@@ -105,7 +105,7 @@ public:
 
 	// @brief function to elaborate upon the protein_matrix_, and will review the pose and update occupied cells by projecting atom lennard jobes radii and marking cells within the radius as occupied
 	// if a sub area boundary is defined, will define that area with different values
-	void project_lj_radii();
+	void project_lj_radii(core::Real projection_multiplier = 1.0);
 
 	//@brief function where a residue object (i.e. ligand) outside of a pose can be imposed upon the matrix, and the space filling volume of the system with the ligand can be analyzed
 	//this forces activation of the space fill data on the class
