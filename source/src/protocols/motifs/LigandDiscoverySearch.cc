@@ -886,7 +886,9 @@ core::Size LigandDiscoverySearch::discover(std::string output_prefix)
 		
 		if ( secondary_working_positions_.size() > 0 ) {
 			//wipe the secondary pose (it may already be empty)
-			secondary_residue_minipose_->clear();
+			if ( secondary_residue_minipose_ != nullptr ) {
+				secondary_residue_minipose_->clear();
+			}
 
 			//seed the secondary minipose, exclude the working position
 			make_secondary_minipose(secondary_residue_minipose_, working_position);
