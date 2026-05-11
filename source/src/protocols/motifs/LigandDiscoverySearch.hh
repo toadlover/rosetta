@@ -252,6 +252,8 @@ private:
 	utility::vector1<core::Size> working_positions_;
 	// @brief vector to hold a secondary list of all indices to investigate/use as a secondary anchor residue, used to set value of secondary_working_position
 	utility::vector1<core::Size> secondary_working_positions_;
+	// @brief pose to hold and secondary residues for motif projection
+	core::pose::PoseOP secondary_residue_minipose_;
 
 	// @brief variable to be used as a cutoff to define the maximum allowed fa_rep score for a placement to be considered
 	core::Real fa_rep_cutoff_;
@@ -300,4 +302,7 @@ private:
 	//for the space fill analysis, another proteingrid will be cloned of this template in the discover function
 	//The clone is because it should be faster to clone to wipe placed ligand data, as opposed to call the wrap and space fill functions again as a form of wiping the object
 	protocols::protein_grid::ProteinGridOP sf_pose_grid_;
+
+	// @brief a protein grid only for residues to form secondary motifs against for a quick selection. LJ radii (x2.25) are projected about each atom to mock an interaction range
+	protocols::protein_grid::ProteinGridOP secondary_residue_grid_;
 };

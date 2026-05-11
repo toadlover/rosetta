@@ -880,6 +880,24 @@ core::Size LigandDiscoverySearch::discover(std::string output_prefix)
 		//create a copy of the space fill matrix that will be used for checking the space fill with the ligand. The member sf_pose_grid will be used as a base to copy back over after the space fill analysis, since that should be faster than reverting the grid using built-in functions (since we have a copy to use as a shortcut)
 		protocols::protein_grid::ProteinGridOP working_sf_pose_grid = utility::pointer::make_shared<protocols::protein_grid::ProteinGrid>(*sf_pose_grid_);
 
+		//if we have residues in the secondary residue vector, make a pose that contains residues except the current anchor (explicitly exclude it if it exists in the secondary list)
+		//populate a proteingrid that is only for the secondary residues and project their secondary radii
+
+		
+		if ( secondary_working_positions_.size() > 0 ) {
+			//wipe the secondary pose (it may already be empty)
+			secondary_residue_minipose_->clear();
+
+			//seed the secondary minipose, exclude the working position
+			make_secondary_minipose(secondary_residue_minipose_, working_position);
+
+			//fill out the secondary proteingrid
+			secondary_residue_grid_ = utility::pointer::make_shared<protocols::protein_grid::ProteinGrid>(secondary_residue_minipose_, resolution_increase_factor);
+
+			//project lj radii with 2.25 multiplier
+			secondary_residue_grid_->project_lj_radii();
+		}
+
 		//derive the occupied ratios of the empty system before placing any ligands, in case we are interested in deriving differentials in space fill
 		//index 1 corresponds to the occupied ratio for the whole system
 		//index 2 corresponds to only the sub-area
@@ -1122,9 +1140,16 @@ core::Size LigandDiscoverySearch::discover(std::string output_prefix)
 					//take the placed ligand, and attempt to collect a motif between the ligresOP and the second residue
 					//iterate against all motifs for the second residue and see if there is a motif from the provided library that matches the placement
 
-					//only investigate if secondary_working_positions_ is not empty (size > 0)
-					if ( secondary_working_positions_.size() > 0 ) {
+					//only investigate if secondary_working_positions_ is not empty (size > 0) and the secondary_residue_grid_ has occupied voxels
+					if ( secondary_working_positions_.size() > 0 && secondary_residue_grid_->get_grid_occupied_cell_count() > 0 ) {
 						ms_tr.Debug << "Secondary residue motif dock." << std::endl;
+
+						//if we do get a "clash" here, that means at least one atom is within the expanded lj radius of at least one secondary residue
+						//since this uses a voxel method and we want this to be fast, we do not yet know where this actually happened and we will not waste time by calculating
+						if ( secondary_residue_grid_->placed_ligand_clash_analysis(ligresOP) == false )
+						{
+							continue;
+						}
 
 						//boolean to determine if we make a motif with any of the other secondary working positions
 						bool makes_secondary_motif = false;
