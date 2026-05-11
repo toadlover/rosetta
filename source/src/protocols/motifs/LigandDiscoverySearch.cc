@@ -889,12 +889,24 @@ core::Size LigandDiscoverySearch::discover(std::string output_prefix)
 		
 		if ( secondary_working_positions_.size() > 0 ) {
 			//wipe the secondary pose (it may already be empty)
-			if ( secondary_residue_minipose_ != nullptr ) {
+			if ( secondary_residue_minipose_ == nullptr ) {
+				secondary_residue_minipose_ = utility::pointer::make_shared< core::pose::Pose >();
+			} else {
 				secondary_residue_minipose_->clear();
 			}
 
 			//seed the secondary minipose, exclude the working position
 			make_secondary_minipose(secondary_residue_minipose_, working_position);
+
+			//escapes if the secondary residue minipose is a nullptr (should not happen) or is empty (could happen if there is only 1 secondary working position and it is the primary working anchor)
+			if ( secondary_residue_minipose_ == nullptr ) {
+				ms_tr.Warning << "Warning: Generated secondary minipose is somehow a null pointer. We are aborting on using anchor residue: " << working_position << std::endl;
+				continue;
+			}			
+			if ( secondary_residue_minipose_->size() == 0 ) {
+				ms_tr.Warning << "Minor Warning: Generated secondary minipose has no residues. User likely only requested a single secondary residue, which is the same as the working primary anchor residue. We are aborting on using anchor residue: " << working_position << std::endl;
+				continue;
+			}	
 
 			//fill out the secondary proteingrid
 			secondary_residue_grid_ = utility::pointer::make_shared<protocols::protein_grid::ProteinGrid>(secondary_residue_minipose_, resolution_increase_factor);
