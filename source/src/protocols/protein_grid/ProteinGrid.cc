@@ -775,6 +775,18 @@ bool ProteinGrid::placed_ligand_clash_analysis(core::conformation::ResidueOP lig
 		atom_xyz.y() = std::floor((atom_xyz.y() + xyz_shift_[2]) * resolution_);
 		atom_xyz.z() = std::floor((atom_xyz.z() + xyz_shift_[3]) * resolution_);
 
+		//adding safe handling to make sure we don't segfault if ligand atoms eixst beyond the boundary of the proteingrid
+		if (
+			atom_xyz.x() < 1 ||
+			atom_xyz.y() < 1 ||
+			atom_xyz.z() < 1 ||
+			atom_xyz.x() > static_cast<int>( protein_matrix_.size() ) ||
+			atom_xyz.y() > static_cast<int>( protein_matrix_[atom_xyz.x()].size() ) ||
+			atom_xyz.z() > static_cast<int>( protein_matrix_[atom_xyz.x()][atom_xyz.y()].size() )
+		) {
+			continue;
+		}
+
 		//plug the atom xyz coordinates into the proteinmatrix and see what the value is
 		//if the value is odd, then it is occupied by the pose (or technically could be a placed ligand, but that would indicate a clash as well)
 		if ( protein_matrix_[atom_xyz.x()][atom_xyz.y()][atom_xyz.z()] % 2 == 1 ) {
