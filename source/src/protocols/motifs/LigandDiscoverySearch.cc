@@ -555,30 +555,33 @@ void LigandDiscoverySearch::make_secondary_minipose(core::pose::PoseOP & minipos
 {
 	ms_tr.Debug << "Building Secondary Minipose made of residue indices: ";
 
-	for ( core::Size resi_pos = 1; resi_pos < secondary_working_positions_.size(); ++resi_pos ) {
+	for ( core::Size resi_pos = 1; resi_pos <= secondary_working_positions_.size(); ++resi_pos ) {
+		
+		core::Size const secondary_resi = secondary_working_positions_[resi_pos];
+
 		//ensure that this is a legal position within the working_pose_
 		if ( secondary_working_positions_[resi_pos] > working_pose_->size() ) {
-			ms_tr.Warning << "Warning: Requested residue index " << secondary_working_positions_[resi_pos] << " is beyond the number of residues in provided PDB of size: " << working_pose_->size() << std::endl;
+			ms_tr.Warning << "Warning: Requested residue index " << secondary_resi << " is beyond the number of residues in provided PDB of size: " << working_pose_->size() << std::endl;
 			continue;			
 		}
 
 		//code breaks if unmatched disulfide  bonds form, just place all residues that can have the disulfide type
-		if ( working_pose_->residue(resi_pos).has_variant_type(core::chemical::DISULFIDE) ) {
-			ms_tr.Warning << "Warning: Skipping risky residue index " << secondary_working_positions_[resi_pos] << " that will try to form a disulfide bond and will break the pipeline." << std::endl;
+		if ( working_pose_->residue(secondary_resi).has_variant_type(core::chemical::DISULFIDE) ) {
+			ms_tr.Warning << "Warning: Skipping risky residue index " << secondary_resi << " that will try to form a disulfide bond and will break the pipeline." << std::endl;
 			continue;
 		}
 
 		//final potential exclusion to not include the residue if it is also the working residue index (don't include the working residue so we don't try to )
-		if ( secondary_working_positions_[resi_pos] == exclude_working_residue )
+		if ( secondary_resi == exclude_working_residue )
 		{
-			ms_tr.Warning << "Minor Warning: Skipping residue index " << secondary_working_positions_[resi_pos] << " for generating this secondary residue minipose because it is the working residue. This will not work as a secondary anchor." << std::endl;
+			ms_tr.Warning << "Minor Warning: Skipping residue index " << secondary_resi << " for generating this secondary residue minipose because it is the working residue. This will not work as a secondary anchor." << std::endl;
 			continue;			
 		}
 
 		//if we pass all of these filters, add the residue to the minipose
-		minipose->append_residue_by_jump(working_pose_->residue(secondary_working_positions_[resi_pos]), 1);
+		minipose->append_residue_by_jump(working_pose_->residue(secondary_resi), 1);
 
-		ms_tr.Debug << secondary_working_positions_[resi_pos] << ", ";
+		ms_tr.Debug << secondary_resi << ", ";
 	}
 
 	//dump the secondary minipose for debugging
