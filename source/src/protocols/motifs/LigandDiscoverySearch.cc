@@ -911,8 +911,14 @@ core::Size LigandDiscoverySearch::discover(std::string output_prefix)
 			//fill out the secondary proteingrid
 			secondary_residue_grid_ = utility::pointer::make_shared<protocols::protein_grid::ProteinGrid>(secondary_residue_minipose_, resolution_increase_factor);
 
+			//debugging esport of the secondary residues grid matrix to visualize what it looks like
+			secondary_residue_grid_->export_protein_matrix_to_pdb("secondary_grid_initial_");
+
 			//project lj radii with 2.25 multiplier
 			secondary_residue_grid_->project_lj_radii();
+
+			//debugging esport of the secondary residues grid matrix to visualize what it looks like
+			secondary_residue_grid_->export_protein_matrix_to_pdb("secondary_grid_lj_");
 		}
 
 		//derive the occupied ratios of the empty system before placing any ligands, in case we are interested in deriving differentials in space fill
