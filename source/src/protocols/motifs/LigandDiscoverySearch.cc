@@ -915,7 +915,7 @@ core::Size LigandDiscoverySearch::discover(std::string output_prefix)
 			secondary_residue_grid_->export_protein_matrix_to_pdb("secondary_grid_initial_");
 
 			//project lj radii with 2.25 multiplier
-			secondary_residue_grid_->project_lj_radii();
+			secondary_residue_grid_->project_lj_radii(2.25);
 
 			//debugging esport of the secondary residues grid matrix to visualize what it looks like
 			secondary_residue_grid_->export_protein_matrix_to_pdb("secondary_grid_lj_");
