@@ -168,6 +168,22 @@ private:
 	// @brief function to initialize additional member variables that rely on options
 	void initialize_from_options();
 
+	// @brief Expand protein_matrix_ so projected LJ radii will not be clipped.
+	// Computes the bounds needed for the current working_pose_ and calls
+	// resize_matrix_to_include_bounds().
+	void ensure_matrix_can_project_lj_radii( core::Real projection_multiplier = 1.0 );
+
+	// @brief Resize protein_matrix_ to include possibly out-of-bounds matrix coordinates.
+	// min/max are matrix-space coordinates using the current xyz_shift_ / resolution_.
+	void resize_matrix_to_include_bounds(
+		int requested_x_min,
+		int requested_x_max,
+		int requested_y_min,
+		int requested_y_max,
+		int requested_z_min,
+		int requested_z_max
+	);
+
 	// @brief function to be used to convert a base 10 number to base 62 (as a string with characters represented by upper+lower case letters and digits)
 	//used in export_protein_matrix_to_pose to assign a unique name to an atom
 	//Due to limitations in atom icoor data, an atom name can be no longer than 4 characters, so this provides 62^4 (~14.7M) unique atom names
