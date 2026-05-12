@@ -1079,6 +1079,38 @@ core::Size LigandDiscoverySearch::discover(std::string output_prefix)
 						continue;
 					}
 
+					//create the minipose to use for early scoring (atr, rep, atrrep) if it does not exist already
+					if ( minipose->size() == 0 ) {
+						//try to make the minipose if it is currently empty
+						//if the function returns false, that means that the minipose is bad and has no residues beyond the ligand; we want to continue if this is the case and the next placement will attempt
+						if ( make_minipose(minipose, ligresOP) == false ) {
+							continue;
+						}
+					}
+
+					//append ligand to minipose for early scoring
+					minipose->append_residue_by_jump(*ligresOP, 1);
+
+					//set up values to be passed into score_minipose and used downstream
+					core::Real fa_rep;
+					core::Real fa_atr;
+					core::Real fa_atr_rep_score_before;
+
+					//score the minipose and set the value to a bool
+					bool minipose_scoring = score_minipose(minipose,fa_rep,fa_atr,fa_atr_rep_score_before);
+
+
+
+					//delete the last residue off minipose (the ligand), since we no longer need it and can recycle the minipose for further iterations
+					minipose->delete_residue_slow(minipose->size());
+
+					//if the value is true, the minipose passes initial scoring
+					//if false, the placement can be killed
+					if ( !minipose_scoring ) {
+						++clashing_counter;
+						continue;
+					}
+
 					//space fill analysis block
 					//faster than using score functions
 					//this is used to determine if enough of a defined binding pocked is filled by a placed ligand or not (ensures elimination of off-target placements)
@@ -1209,39 +1241,6 @@ core::Size LigandDiscoverySearch::discover(std::string output_prefix)
 
 					}
 					
-
-					//create the minipose to use for early scoring (atr, rep, atrrep) if it does not exist already
-					if ( minipose->size() == 0 ) {
-						//try to make the minipose if it is currently empty
-						//if the function returns false, that means that the minipose is bad and has no residues beyond the ligand; we want to continue if this is the case and the next placement will attempt
-						if ( make_minipose(minipose, ligresOP) == false ) {
-							continue;
-						}
-					}
-
-					//append ligand to minipose for early scoring
-					minipose->append_residue_by_jump(*ligresOP, 1);
-
-					//set up values to be passed into score_minipose and used downstream
-					core::Real fa_rep;
-					core::Real fa_atr;
-					core::Real fa_atr_rep_score_before;
-
-					//score the minipose and set the value to a bool
-					bool minipose_scoring = score_minipose(minipose,fa_rep,fa_atr,fa_atr_rep_score_before);
-
-
-
-					//delete the last residue off minipose (the ligand), since we no longer need it and can recycle the minipose for further iterations
-					minipose->delete_residue_slow(minipose->size());
-
-					//if the value is true, the minipose passes initial scoring
-					//if false, the placement can be killed
-					if ( !minipose_scoring ) {
-						++clashing_counter;
-						continue;
-					}
-
 					++passed_placement_counter;
 
 					//append ligand to working pose
