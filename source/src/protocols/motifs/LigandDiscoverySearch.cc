@@ -781,7 +781,7 @@ core::Size LigandDiscoverySearch::discover(std::string output_prefix)
 			discovery_position_residue = working_pose_->residue(working_position).name3();
 
 			//get motif sublibrary
-			motif_library_for_select_residue_ = get_motif_sublibrary_by_aa(discovery_position_residue);
+			motif_library_for_select_residue_ = protocols::motifs::get_motif_sublibrary_by_aa(motif_library_, discovery_position_residue);
 
 			if ( motif_library_for_select_residue_.size() == 0 ) {
 				ms_tr.Warning << "We have no motifs to work with here. Exiting function." << std::endl;
@@ -1584,6 +1584,7 @@ void LigandDiscoverySearch::reset_working_pose()
 
 //function to get a sub-library of motifs from the main library, based on the residue being used (only get for select residue)
 //function may have use outside discover, so public can use it
+/*
 protocols::motifs::MotifCOPs LigandDiscoverySearch::get_motif_sublibrary_by_aa(std::string residue_name)
 {
 	//create temporary motifcops object to hold
@@ -1608,3 +1609,4 @@ protocols::motifs::MotifCOPs LigandDiscoverySearch::get_motif_sublibrary_by_aa(s
 
 	return motif_holder;
 }
+*/

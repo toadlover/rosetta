@@ -182,7 +182,7 @@ public:
 
 	// @brief function to get a sub-library of motifs from the main library, based on the residue being used (only get for select residue)
 	//function may have use outside discover, so public can use it
-	protocols::motifs::MotifCOPs get_motif_sublibrary_by_aa(std::string residue_name);
+	//protocols::motifs::MotifCOPs get_motif_sublibrary_by_aa(std::string residue_name);
 
 	// @brief function to push all adjacent atom indices if inputted ligand residue (pointer) into a 3D core::Size vector (atom_trios typedef)
 	//this in theory could be useful beyond the scope the discover function, so I will leave this as public
