@@ -1567,7 +1567,7 @@ protocols::motifs::MotifCOPs get_motif_sublibrary_by_aa(protocols::motifs::Motif
 	//motif_library_for_select_residue_ = motif_holder;
 
 
-	mu_tr.Debug << "Created motif sub-library for residue " << residue_name << " with " << motif_library_for_select_residue_.size() << " motifs in it." << std::endl;
+	mu_tr.Debug << "Created motif sub-library for residue " << residue_name << " with " << motif_holder.size() << " motifs in it." << std::endl;
 
 
 	return motif_holder;
