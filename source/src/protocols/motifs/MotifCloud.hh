@@ -154,6 +154,13 @@ private:
 	//it is possible that this will go unused if the user loads in a motif_matrix, as the original pose isn't explicitly necessary to represent the motif matrix if we have already projected motifs
 	core::pose::PoseOP working_pose_;
 
+	// @brief the full input motifs list provided by the user
+	protocols::motifs::MotifCOPs motif_library_;
+
+	// @brief a map of smaller motif libraries separated by protein residue for faster processing at the cost of memory overhead
+	//will be filled out when iterating over residues to project motifs from, and populated using the motif_utils get_motif_sublibrary_by_aa() function. Keys will be strings for residue 3 letter codes
+	std::map< std::string, protocols::motifs::MotifCOPs > motif_library_map_by_residue_;
+
 	// @brief vector to hold the values that atom coordinates shift by in the x,y,z directions
 	utility::vector1<int> xyz_shift_;
 

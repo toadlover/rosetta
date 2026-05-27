@@ -163,8 +163,9 @@ MotifCloud::MotifCloud(core::pose::PoseOP in_pose, protocols::motifs::MotifCOPs 
 	//initialize options/key variables
 	initialize();
 
-	//seed the working_pose_ from the in_pose
+	//seed the working_pose_ from the in_pose and motif_library_ from motif_library
 	working_pose_ = in_pose;
+	motif_library_ = motif_library;
 
 	//wrap the matrix around the pose
 	wrap_matrix_around_pose();
@@ -329,4 +330,47 @@ void MotifCloud::reset_xyz_vectors()
 	xyz_bound_ = utility::vector1<int>(3, 0);
 }
 
-// 
+// @brief function to take a motifs list and project it about all atoms in the working_pose_
+void MotifCloud::project_motifs_from_residues()
+{
+	//iterate over each residue in the pose
+	for ( core::Size resi_pos = 1; resi_pos <= working_pose_->size(); ++resi_pos ) {
+
+		//very likely want to integrate code that allows a user to only make a cloud on specific residue indices
+		//integrate a residue index gate if the user does specify wanting to only investigate select residues for a motif cloud
+
+		//get the residue name
+		std::string res_name = working_pose_->residue(resi_pos).name3();
+
+		// if the map does not already contain a motif sublibrary for this residue type,
+		// create it and store it
+		auto iter = motif_library_map_by_residue_.find( res_name );
+
+		//if the motif_library_map_by_residue_ map doesn't already have motifs for the workign residue type, attempt to derive them and populate the map
+		//if not in the library map
+		if( iter == motif_library_map_by_residue_.end() )
+		{
+			//call get_motif_sublibrary_by_aa and add the library to the map
+			motif_library_map_by_residue_[res_name] = get_motif_sublibrary_by_aa( motif_library_, res_name );
+
+
+			// update the iterator now that the map has been updated
+			iter = motif_library_map_by_residue_.find( res_name );
+		}
+
+		//safety/sanity check if we somehow fail to get motifs (I guess if like a bad list is included or something)
+		if ( iter == motif_library_map_by_residue_.end() ) {
+			ms_tr.Warning << "Could not find or create motif sub-library for residue " << res_name << " at position " << resi_pos << std::endl;
+			continue;
+		}		
+
+		//iterate over each motif for the residue and project atoms relative to the residue's position
+		for ( auto motifcop : motif_library_map_by_residue_[ res_name ] ) {
+			//collect residue name from motifcop
+			std::string motif_residue_name(motifcop->restype_name1());
+
+			//place the motif atoms in a 3D space and derive their coordinates so that we may add them to the motifmatrix
+		}
+
+	}
+}
