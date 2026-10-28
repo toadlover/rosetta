@@ -2,7 +2,7 @@ cd %(workdir)s
 
 [ -x %(bin)s/motif_cloud.%(binext)s ] || exit 1
 
-grep -q '^ATOM.* GLN A 134 ' 4s0v_and_suvorexant_only.pdb || exit 1
+grep -q '^ATOM.* GLN A 134 ' 4s0v_receptor_only.pdb || exit 1
 
 %(bin)s/motif_cloud.%(binext)s %(additional_flags)s @flags -database %(database)s -testing:INTEGRATION_TEST 2>&1 \
 	| egrep -vf ../../ignore_list \
