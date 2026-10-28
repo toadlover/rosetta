@@ -10,91 +10,21 @@
 /// @file
 /// @brief Sparse voxelized projections of ligand-motif partner anchors around selected pose residues.
 
-
+// Core
 #include <core/types.hh>
-#include <core/chemical/ResidueType.fwd.hh>
-#include <core/chemical/MutableResidueType.fwd.hh>
-#include <core/chemical/ResidueTypeSet.fwd.hh>
-#include <core/chemical/ResidueTypeFinder.fwd.hh>
 #include <core/pose/Pose.fwd.hh>
-#include <core/pose/Pose.hh>
-#include <core/scoring/ScoreFunction.fwd.hh>
-#include <core/scoring/ScoreFunctionFactory.fwd.hh>
-#include <core/id/AtomID.fwd.hh>
-#include <protocols/dna/RestrictDesignToProteinDNAInterface.fwd.hh>
-#include <protocols/motifs/LigandMotifSearch.fwd.hh>
-#include <protocols/motifs/MotifLibrary.fwd.hh>
-#include <core/conformation/Residue.fwd.hh>
-#include <core/conformation/Conformation.fwd.hh>
-#include <core/chemical/ChemicalManager.fwd.hh>
-#include <protocols/motifs/Motif.fwd.hh>
-#include <protocols/motifs/MotifHit.fwd.hh>
-#include <core/pack/rotamer_set/RotamerSet.fwd.hh>
-#include <core/pack/rotamer_set/RotamerSetFactory.fwd.hh>
-#include <protocols/motifs/BuildPosition.fwd.hh>
-#include <core/scoring/methods/EnergyMethodOptions.fwd.hh>
-#include <core/kinematics/MoveMap.fwd.hh>
-#include <core/scoring/constraints/ConstraintSet.fwd.hh>
-#include <protocols/minimization_packing/MinMover.fwd.hh>
-#include <core/scoring/Energies.fwd.hh>
-#include <core/scoring/EnergyMap.fwd.hh>
-#include <core/scoring/hbonds/HBondSet.fwd.hh>
 #include <core/chemical/AtomTypeSet.fwd.hh>
-#include <core/chemical/ChemicalManager.hh>
-#include <core/chemical/AtomTypeSet.hh>
 
-#include <core/pose/PDBInfo.fwd.hh>
-
-#include <core/chemical/GlobalResidueTypeSet.fwd.hh>
-
-#include <protocols/dna/PDBOutput.fwd.hh>
-
-#include <basic/prof.fwd.hh>
-#include <basic/Tracer.fwd.hh>
-
-
+// Motifs
+#include <protocols/motifs/Motif.fwd.hh>
 
 // Utility Headers
-#include <utility/io/ozstream.fwd.hh>
-#include <utility/file/FileName.fwd.hh>
-#include <utility/vector1.fwd.hh>
 #include <utility/vector1.hh>
-#include <utility/excn/Exceptions.fwd.hh>
 
 // c++ headers
-#include <fstream>
-#include <iostream>
-#include <string>
-#include <queue>
-#include <functional>
 #include <map>
 #include <array>
-
-// option key includes
-
-#include <numeric/xyzVector.fwd.hh>
-#include <protocols/ligand_docking/InterfaceScoreCalculator.fwd.hh>
-
-#include <protocols/ligand_docking/MoveMapBuilder.fwd.hh>
-#include <protocols/ligand_docking/LigandArea.fwd.hh>
-#include <protocols/ligand_docking/InterfaceBuilder.fwd.hh>
-#include <protocols/ligand_docking/MoveMapBuilder.fwd.hh>
-#include <core/optimization/MinimizerOptions.fwd.hh>
-#include <core/kinematics/MoveMap.fwd.hh>
-#include <protocols/ligand_docking/HighResDocker.fwd.hh>
-#include <protocols/ligand_docking/LigandDockProtocol.fwd.hh>
-#include <core/scoring/func/HarmonicFunc.fwd.hh>
-#include <core/chemical/PoseResidueTypeSet.fwd.hh>
-
-#include <ObjexxFCL/FArray1D.fwd.hh>
-
-#include <protocols/protein_grid/ProteinGrid.fwd.hh>
-
-// Time profiling header
-#include <time.h>
-
-//for data type debugging
-#include <typeinfo>
+#include <string>
 
 namespace protocols {
 namespace motifs {
