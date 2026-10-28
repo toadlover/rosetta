@@ -81,7 +81,7 @@ void MotifCloud::write_visualization_pdb(
 	output << "REMARK Density ranges in percent of maximum: I 0-12.5, N 12.5-25, F 25-37.5, CL 37.5-50, S 50-62.5, P 62.5-75, O 75-87.5, BR 87.5-100.\n";
 	utility::fixedsizearray1<std::string, 8> const density_bin_elements = {
 		"I", "N", "F", "CL", "S", "P", "O", "BR"
-	};
+		};
 
 	core::Size serial = 0;
 	for ( auto const & voxel_entry : matrix ) {
@@ -182,7 +182,7 @@ void MotifCloud::project_motifs_from_residues(
 			utility::fixedsizearray1<core::Size, 3> partner_atom_type_indices;
 			utility::fixedsizearray1<std::string, 3> const partner_atom_type_names = {
 				motif->res2_atom1_name(), motif->res2_atom2_name(), motif->res2_atom3_name()
-			};
+				};
 			bool partner_atom_types_valid = true;
 			for ( core::Size anchor_index = 1; anchor_index <= partner_atom_type_names.size(); ++anchor_index ) {
 				if ( !atom_type_set_->has_atom(partner_atom_type_names[anchor_index]) ) {
@@ -217,7 +217,7 @@ void MotifCloud::project_motifs_from_residues(
 				projected_partner_stub.v,
 				projected_partner_stub.v + approximate_bond_length *
 				(std::cos(approximate_bond_angle) * frame_x + std::sin(approximate_bond_angle) * frame_y)
-			};
+				};
 
 			for ( core::Size anchor_index = 1; anchor_index <= projected_anchor_xyz.size(); ++anchor_index ) {
 				numeric::xyzVector<core::Real> const & xyz = projected_anchor_xyz[anchor_index];
