@@ -13,6 +13,7 @@
 #include <protocols/motifs/MotifCloud.hh>
 
 #include <core/chemical/ChemicalManager.hh>
+#include <core/chemical/AtomTypeSet.hh>
 #include <core/conformation/Residue.hh>
 #include <core/kinematics/Stub.hh>
 #include <core/pose/Pose.hh>
@@ -78,9 +79,9 @@ void MotifCloud::write_visualization_pdb(
 	output << "REMARK B-factor is voxel atom count as a percentage of the maximum voxel count in this cloud.\n";
 	output << "REMARK Occupancy stores raw projected anchor count, capped at 999.99 by the PDB field width.\n";
 	output << "REMARK Density ranges in percent of maximum: I 0-12.5, N 12.5-25, F 25-37.5, CL 37.5-50, S 50-62.5, P 62.5-75, O 75-87.5, BR 87.5-100.\n";
-	std::array<std::string, 8> const density_bin_elements = {{
+	utility::fixedsizearray1<std::string, 8> const density_bin_elements = {
 		"I", "N", "F", "CL", "S", "P", "O", "BR"
-		}};
+	};
 
 	core::Size serial = 0;
 	for ( auto const & voxel_entry : matrix ) {
@@ -99,8 +100,8 @@ void MotifCloud::write_visualization_pdb(
 		core::Real const density_percent = maximum_voxel_count == 0 ? 0.0 :
 			100.0 * static_cast<core::Real>(voxel_count) / static_cast<core::Real>(maximum_voxel_count);
 		core::Size const density_bin_index = std::min<core::Size>(
-			static_cast<core::Size>(density_percent / 12.5),
-			density_bin_elements.size() - 1
+			static_cast<core::Size>(density_percent / 12.5) + 1,
+			density_bin_elements.size()
 		);
 		std::string const & element = density_bin_elements[density_bin_index];
 		std::string const atom_name = element.size() == 1 ? " " + element + "  " : " " + element + " ";
@@ -108,9 +109,9 @@ void MotifCloud::write_visualization_pdb(
 		output << "HETATM" << std::setw(5) << serial << ' ' << atom_name << " VXL X"
 			<< std::setw(4) << 1 << "    "
 			<< std::fixed << std::setprecision(3)
-			<< std::setw(8) << voxel_entry.first[0] + 0.5
 			<< std::setw(8) << voxel_entry.first[1] + 0.5
 			<< std::setw(8) << voxel_entry.first[2] + 0.5
+			<< std::setw(8) << voxel_entry.first[3] + 0.5
 			<< std::setprecision(2) << std::setw(6) << occupancy_count
 			<< std::setw(6) << density_percent << "          " << std::setw(2) << element << " \n";
 	}
@@ -178,12 +179,12 @@ void MotifCloud::project_motifs_from_residues(
 				continue;
 			}
 
-			std::array<core::Size, 3> partner_atom_type_indices;
-			std::array<std::string, 3> const partner_atom_type_names = {{
+			utility::fixedsizearray1<core::Size, 3> partner_atom_type_indices;
+			utility::fixedsizearray1<std::string, 3> const partner_atom_type_names = {
 				motif->res2_atom1_name(), motif->res2_atom2_name(), motif->res2_atom3_name()
-				}};
+			};
 			bool partner_atom_types_valid = true;
-			for ( core::Size anchor_index = 0; anchor_index < partner_atom_type_names.size(); ++anchor_index ) {
+			for ( core::Size anchor_index = 1; anchor_index <= partner_atom_type_names.size(); ++anchor_index ) {
 				if ( !atom_type_set_->has_atom(partner_atom_type_names[anchor_index]) ) {
 					ms_tr.Warning << "Skipping motif with invalid partner anchor atom type "
 						<< partner_atom_type_names[anchor_index] << " for source residue "
@@ -211,20 +212,19 @@ void MotifCloud::project_motifs_from_residues(
 			core::Real constexpr approximate_bond_angle = 2.0 * 3.14159265358979323846 / 3.0;
 			numeric::xyzVector<core::Real> const & frame_x = projected_partner_stub.M.col_x();
 			numeric::xyzVector<core::Real> const & frame_y = projected_partner_stub.M.col_y();
-			std::array<numeric::xyzVector<core::Real>, 3> const projected_anchor_xyz = {{
+			utility::fixedsizearray1<numeric::xyzVector<core::Real>, 3> const projected_anchor_xyz = {
 				projected_partner_stub.v + approximate_bond_length * frame_x,
 				projected_partner_stub.v,
 				projected_partner_stub.v + approximate_bond_length *
 				(std::cos(approximate_bond_angle) * frame_x + std::sin(approximate_bond_angle) * frame_y)
-				}};
+			};
 
-			for ( core::Size anchor_index = 0; anchor_index < projected_anchor_xyz.size(); ++anchor_index ) {
+			for ( core::Size anchor_index = 1; anchor_index <= projected_anchor_xyz.size(); ++anchor_index ) {
 				numeric::xyzVector<core::Real> const & xyz = projected_anchor_xyz[anchor_index];
-				VoxelIndex const voxel = {{
-					static_cast<int>(std::floor(xyz.x())),
-					static_cast<int>(std::floor(xyz.y())),
-					static_cast<int>(std::floor(xyz.z()))
-					}};
+				VoxelIndex voxel;
+				voxel[1] = static_cast<int>(std::floor(xyz.x()));
+				voxel[2] = static_cast<int>(std::floor(xyz.y()));
+				voxel[3] = static_cast<int>(std::floor(xyz.z()));
 				++residue_matrix[voxel][partner_atom_type_indices[anchor_index]];
 				++aggregate_motif_matrix_[voxel][partner_atom_type_indices[anchor_index]];
 			}

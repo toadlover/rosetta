@@ -19,11 +19,11 @@
 #include <protocols/motifs/Motif.fwd.hh>
 
 // Utility Headers
+#include <utility/fixedsizearray1.hh>
 #include <utility/vector1.hh>
 
 // c++ headers
 #include <map>
-#include <array>
 #include <string>
 
 namespace protocols {
@@ -34,10 +34,20 @@ class MotifCloud
 public:
 
 	/// @brief Integer pose-space voxel coordinate; each voxel spans one angstrom per axis.
-	using VoxelIndex = std::array<int, 3>;
+	using VoxelIndex = utility::fixedsizearray1<int, 3>;
+	struct VoxelIndexLess {
+		bool operator()( VoxelIndex const & lhs, VoxelIndex const & rhs ) const {
+			for ( core::Size axis = 1; axis <= 3; ++axis ) {
+				if ( lhs[axis] != rhs[axis] ) {
+					return lhs[axis] < rhs[axis];
+				}
+			}
+			return false;
+		}
+	};
 	/// @brief Counts keyed by 1-based fa_standard atom type index.
 	using AtomTypeCounts = std::map<core::Size, core::Size>;
-	using SparseMotifMatrix = std::map<VoxelIndex, AtomTypeCounts>;
+	using SparseMotifMatrix = std::map<VoxelIndex, AtomTypeCounts, VoxelIndexLess>;
 	using PerResidueMotifMatrices = std::map<core::Size, SparseMotifMatrix>;
 
 	// destructor
