@@ -556,13 +556,13 @@ void LigandDiscoverySearch::make_secondary_minipose(core::pose::PoseOP & minipos
 	ms_tr.Debug << "Building Secondary Minipose made of residue indices: ";
 
 	for ( core::Size resi_pos = 1; resi_pos <= secondary_working_positions_.size(); ++resi_pos ) {
-		
+
 		core::Size const secondary_resi = secondary_working_positions_[resi_pos];
 
 		//ensure that this is a legal position within the working_pose_
 		if ( secondary_working_positions_[resi_pos] > working_pose_->size() ) {
 			ms_tr.Warning << "Warning: Requested residue index " << secondary_resi << " is beyond the number of residues in provided PDB of size: " << working_pose_->size() << std::endl;
-			continue;			
+			continue;
 		}
 
 		//code breaks if unmatched disulfide  bonds form, just place all residues that can have the disulfide type
@@ -572,10 +572,9 @@ void LigandDiscoverySearch::make_secondary_minipose(core::pose::PoseOP & minipos
 		}
 
 		//final potential exclusion to not include the residue if it is also the working residue index (don't include the working residue so we don't try to )
-		if ( secondary_resi == exclude_working_residue )
-		{
+		if ( secondary_resi == exclude_working_residue ) {
 			ms_tr.Warning << "Minor Warning: Skipping residue index " << secondary_resi << " for generating this secondary residue minipose because it is the working residue. This will not work as a secondary anchor." << std::endl;
-			continue;			
+			continue;
 		}
 
 		//if we pass all of these filters, add the residue to the minipose
@@ -1278,7 +1277,7 @@ core::Size LigandDiscoverySearch::discover(std::string output_prefix, core::Size
 		//if we have residues in the secondary residue vector, make a pose that contains residues except the current anchor (explicitly exclude it if it exists in the secondary list)
 		//populate a proteingrid that is only for the secondary residues and project their secondary radii
 
-		
+
 		if ( secondary_working_positions_.size() > 0 ) {
 			//wipe the secondary pose (it may already be empty)
 			if ( secondary_residue_minipose_ == nullptr ) {
@@ -1294,11 +1293,11 @@ core::Size LigandDiscoverySearch::discover(std::string output_prefix, core::Size
 			if ( secondary_residue_minipose_ == nullptr ) {
 				ms_tr.Warning << "Warning: Generated secondary minipose is somehow a null pointer. We are aborting on using anchor residue: " << working_position << std::endl;
 				continue;
-			}			
+			}
 			if ( secondary_residue_minipose_->size() == 0 ) {
 				ms_tr.Warning << "Minor Warning: Generated secondary minipose has no residues. User likely only requested a single secondary residue, which is the same as the working primary anchor residue. We are aborting on using anchor residue: " << working_position << std::endl;
 				continue;
-			}	
+			}
 
 			//fill out the secondary proteingrid
 			secondary_residue_grid_ = utility::pointer::make_shared<protocols::protein_grid::ProteinGrid>(secondary_residue_minipose_, resolution_increase_factor);
@@ -1593,8 +1592,7 @@ core::Size LigandDiscoverySearch::discover(std::string output_prefix, core::Size
 
 						//if we do get a "clash" here, that means at least one atom is within the expanded lj radius of at least one secondary residue
 						//since this uses a voxel method and we want this to be fast, we do not yet know where this actually happened and we will not waste time by calculating
-						if ( secondary_residue_grid_->placed_ligand_clash_analysis(ligresOP) == false )
-						{
+						if ( secondary_residue_grid_->placed_ligand_clash_analysis(ligresOP) == false ) {
 							continue;
 						}
 
@@ -1605,7 +1603,7 @@ core::Size LigandDiscoverySearch::discover(std::string output_prefix, core::Size
 						for ( const auto & secondary_working_position : secondary_working_positions_ ) {
 
 							//skip here if the secondary_working_position and working_position are not the same so we are not taking motifs off the workign position (since we should obviously get one back)
-							//this could realistically be encountered if using multiple primary anchor residues, and you include the any primary anchor indices in the secondary list 
+							//this could realistically be encountered if using multiple primary anchor residues, and you include the any primary anchor indices in the secondary list
 							if ( secondary_working_position == working_position ) {
 								ms_tr.Debug << "Skipping check for secondary motif on residue " << secondary_working_position << ", since it is the working anchor." << std::endl;
 								continue;
@@ -1632,7 +1630,7 @@ core::Size LigandDiscoverySearch::discover(std::string output_prefix, core::Size
 						}
 
 					}
-					
+
 					++passed_placement_counter;
 
 					//append ligand to working pose
@@ -1909,26 +1907,26 @@ void LigandDiscoverySearch::reset_working_pose()
 /*
 protocols::motifs::MotifCOPs LigandDiscoverySearch::get_motif_sublibrary_by_aa(std::string residue_name)
 {
-	//create temporary motifcops object to hold
-	protocols::motifs::MotifCOPs motif_holder;
+//create temporary motifcops object to hold
+protocols::motifs::MotifCOPs motif_holder;
 
-	for ( auto motifcop : motif_library_ ) {
-		//collect residue name from motifcop
-		std::string motif_residue_name(motifcop->restype_name1());
+for ( auto motifcop : motif_library_ ) {
+//collect residue name from motifcop
+std::string motif_residue_name(motifcop->restype_name1());
 
-		//if residue name matches that of the residue at the working position, add it to the motif_holder
-		if ( motif_residue_name == residue_name ) {
-			motif_holder.push_back(motifcop);
-		}
-	}
+//if residue name matches that of the residue at the working position, add it to the motif_holder
+if ( motif_residue_name == residue_name ) {
+motif_holder.push_back(motifcop);
+}
+}
 
-	//assign motif_holder contents to motif_library_for_select_residue_
-	motif_library_for_select_residue_ = motif_holder;
-
-
-	ms_tr.Debug << "Created motif sub-library for residue " << residue_name << " with " << motif_library_for_select_residue_.size() << " motifs in it." << std::endl;
+//assign motif_holder contents to motif_library_for_select_residue_
+motif_library_for_select_residue_ = motif_holder;
 
 
-	return motif_holder;
+ms_tr.Debug << "Created motif sub-library for residue " << residue_name << " with " << motif_library_for_select_residue_.size() << " motifs in it." << std::endl;
+
+
+return motif_holder;
 }
 */

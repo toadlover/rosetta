@@ -400,7 +400,7 @@ void ProteinGrid::project_lj_radii( core::Real projection_multiplier ){
 
 	if ( projection_multiplier <= 0.0 ) {
 		ms_tr.Warning << "Invalid projection_multiplier of " << projection_multiplier
-		              << ". Resetting to 1.0." << std::endl;
+			<< ". Resetting to 1.0." << std::endl;
 		projection_multiplier = 1.0;
 	}
 
@@ -593,13 +593,13 @@ ProteinGrid::ensure_matrix_can_project_lj_radii( core::Real projection_multiplie
 {
 	if ( projection_multiplier <= 0.0 ) {
 		ms_tr.Warning << "Invalid projection_multiplier of " << projection_multiplier
-		              << ". Resetting to 1.0." << std::endl;
+			<< ". Resetting to 1.0." << std::endl;
 		projection_multiplier = 1.0;
 	}
 
 	if ( working_pose_ == nullptr || working_pose_->size() == 0 ) {
 		ms_tr.Warning << "Cannot expand ProteinGrid for LJ radii because working_pose_ is empty/null."
-		              << std::endl;
+			<< std::endl;
 		return;
 	}
 
@@ -727,10 +727,10 @@ ProteinGrid::resize_matrix_to_include_bounds(
 
 	//if bounds do not need to be expanded, return now to save time
 	if (
-		x_low_needed == 0 && x_high_needed == 0 &&
-		y_low_needed == 0 && y_high_needed == 0 &&
-		z_low_needed == 0 && z_high_needed == 0
-	) {
+			x_low_needed == 0 && x_high_needed == 0 &&
+			y_low_needed == 0 && y_high_needed == 0 &&
+			z_low_needed == 0 && z_high_needed == 0
+			) {
 		return;
 	}
 
@@ -760,10 +760,10 @@ ProteinGrid::resize_matrix_to_include_bounds(
 	core::Size const new_z_bound = old_z_bound + z_low_offset + z_high_needed;
 
 	ms_tr.Debug << "Expanding ProteinGrid from "
-	            << old_x_bound << "," << old_y_bound << "," << old_z_bound
-	            << " to "
-	            << new_x_bound << "," << new_y_bound << "," << new_z_bound
-	            << std::endl;
+		<< old_x_bound << "," << old_y_bound << "," << old_z_bound
+		<< " to "
+		<< new_x_bound << "," << new_y_bound << "," << new_z_bound
+		<< std::endl;
 
 	ProteinMatrix new_matrix;
 
@@ -1030,13 +1030,13 @@ bool ProteinGrid::placed_ligand_clash_analysis(core::conformation::ResidueOP lig
 
 		//adding safe handling to make sure we don't segfault if ligand atoms eixst beyond the boundary of the proteingrid
 		if (
-			atom_xyz.x() < 1 ||
-			atom_xyz.y() < 1 ||
-			atom_xyz.z() < 1 ||
-			atom_xyz.x() > static_cast<int>( protein_matrix_.size() ) ||
-			atom_xyz.y() > static_cast<int>( protein_matrix_[atom_xyz.x()].size() ) ||
-			atom_xyz.z() > static_cast<int>( protein_matrix_[atom_xyz.x()][atom_xyz.y()].size() )
-		) {
+				atom_xyz.x() < 1 ||
+				atom_xyz.y() < 1 ||
+				atom_xyz.z() < 1 ||
+				atom_xyz.x() > static_cast<int>( protein_matrix_.size() ) ||
+				atom_xyz.y() > static_cast<int>( protein_matrix_[atom_xyz.x()].size() ) ||
+				atom_xyz.z() > static_cast<int>( protein_matrix_[atom_xyz.x()][atom_xyz.y()].size() )
+				) {
 			continue;
 		}
 

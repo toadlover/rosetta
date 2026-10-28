@@ -877,14 +877,13 @@ utility::vector1< core::Real > IdentifyLigandMotifs::evaluate_motifs_of_pose(cor
 		//iterate over the library of motifs created by the ligand placement
 		for ( auto ligmotifcop : placement_libraryCOPs ) {
 
-			//call 
+			//call
 			std::tuple<bool, std::string, std::string> results = single_motif_exists_in_library(ligmotifcop, mymap);
 
 			//increment real motif counter if true
-			if ( std::get<0>(results) )
-			{
+			if ( std::get<0>(results) ) {
 				//increment real counter
-				++placement_motifs_data[4];				
+				++placement_motifs_data[4];
 			}
 
 			//add comment to the working pose
@@ -980,7 +979,7 @@ std::tuple<bool, std::string, std::string> IdentifyLigandMotifs::single_motif_ex
 
 				//add comment about real motif match for placement motif
 				//core::pose::add_comment(*working_pose, "Placement motifs: Real motif check - " + ligmotifcop->remark(), real_motif_match_info);
-				
+
 
 				//greedy algorithm, stop for current ligmotifcop when we hit the first match since we got what we wanted
 				//break;
@@ -1001,7 +1000,7 @@ std::tuple<bool, std::string, std::string> IdentifyLigandMotifs::single_motif_ex
 // returns a bool indicating whether any motifs were found for the residue-ligand pair in the library
 bool IdentifyLigandMotifs::residue_forms_library_motif(core::pose::PoseOP const & pose, std::map<protocols::motifs::motif_atoms,protocols::motifs::MotifCOPs> const & mymap)
 {
-	// make a new motif_library to use to contain the motif(s) pulled from 
+	// make a new motif_library to use to contain the motif(s) pulled from
 	protocols::motifs::MotifLibrary pose_motif_library;
 
 	//make vector that holds the indices of residues that contribute to motifs (probably the easiest way to track if motifs were made on residues of interest)
@@ -1013,14 +1012,13 @@ bool IdentifyLigandMotifs::residue_forms_library_motif(core::pose::PoseOP const 
 
 	//iterate over all motifs made to see if they exist in the map
 	for ( auto ligmotifcop : placement_libraryCOPs ) {
-		//call 
+		//call
 		std::tuple<bool, std::string, std::string> results = single_motif_exists_in_library(ligmotifcop, mymap);
 
 		//return true that we found a motif
-		if ( std::get<0>(results) )
-		{
-			return true;			
-		}	
+		if ( std::get<0>(results) ) {
+			return true;
+		}
 	}
 	return false;
 }
@@ -1095,7 +1093,7 @@ IdentifyLigandMotifs::placed_ligand_forms_library_motif_fast(
 			return true;
 		}
 	}
-	
+
 
 	return false;
 }
